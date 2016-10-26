@@ -30,8 +30,10 @@ to send a new line to continue with the process.
 
 ## Example 
 
-```
-ertbot --text --agree-tos --email you@example.com \
+Run the certbot with the following command:
+
+```bash
+certbot --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
         -a certbot-external-auth:out \
         --preferred-challenges dns \
@@ -39,7 +41,13 @@ ertbot --text --agree-tos --email you@example.com \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
         certonly 2>/dev/null
+```
 
+Stderr contains string log / report, not in JSON format.
+
+Stdout:
+
+```json
 {"cmd": "validate", "type": "dns", "validation": "rYIS1e4mFCsJXN43LMq_fnFptIfoLC4RhbJABfT2_78", "domain": "_acme-challenge.stoke2.pki.enigmabridge.com", "key-auth": "3R11yWg6DT6NECoroLK3J4p5ge770rBLym5ihSVEePU.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s"}
 
 {"cmd": "validate", "type": "dns", "validation": "mZ3WMFp8thovIMqfMFdvm3Lzfv90hNAl3633Bm2-PrQ", "domain": "_acme-challenge.st2.pki.enigmabridge.com", "key-auth": "k5zcovdyhgPgZsmiQE2QMBJHFKMT5qRjVCCSawmycYY.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s"}
