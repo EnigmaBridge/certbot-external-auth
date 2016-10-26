@@ -1,0 +1,2 @@
+exclude deprecated/**
+include README.md
