@@ -66,7 +66,8 @@ After `{"cmd": "validate"}` message the client waits on `\n` on the standard inp
 
 ## About
 
-Loosely based on the Let's Encrypt nginx plugin and [certbot-external]
+Loosely based on the Let's Encrypt nginx plugin, [certbot-external] and
+`manual.py` plugin.
 
 Once ticket [2782] is resolved this won't be needed. 
 
