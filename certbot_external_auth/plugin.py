@@ -267,11 +267,17 @@ s.serve_forever()" """
     def _is_text_mode(self):
         return self.conf("text-mode")
 
-    def _json_out_and_wait(self, data):
+    def _json_out(self, data, new_line=False):
         # pylint: disable=no-self-use
         json_str = json.dumps(data)
-        sys.stdout.write(json_str + '\n')
-        sys.stderr.flush()
+        if new_line:
+            json_str += '\n'
+        sys.stdout.write(json_str)
+        sys.stdout.flush()
+
+    def _json_out_and_wait(self, data):
+        # pylint: disable=no-self-use
+        self._json_out(data, True)
         six.moves.input("")
 
     def _notify_and_wait(self, message):
