@@ -467,7 +467,6 @@ s.serve_forever()" """
         return response
 
     def _perform_tlssni01_challenge(self, achall):
-        response_orig, validation = achall.response_and_validation()
         tls_help = self._get_tls_sni_help(achall)
         response = tls_help._setup_challenge_cert(achall)
 
