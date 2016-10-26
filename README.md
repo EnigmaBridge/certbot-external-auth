@@ -1,10 +1,13 @@
 ## External authenticator for Certbot
 
-This plugin helps with domain validation process by calling an external 
+This plugin helps with domain validation process either by calling an external 
 program or by printing JSON challenge to stdout for invoker to solve.
 
-The plugin is designed mainly to automate the DNS validation, but supports also
-HTTP and TLS-SNI.
+Supported challenges:
+
+* DNS
+* HTTP
+* TLS-SNI
 
 This plugin only supports authentication, not installation.
 
