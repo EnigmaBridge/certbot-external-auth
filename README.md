@@ -5,16 +5,27 @@ program or by printing JSON for the
 
 The plugin is designed mainly to automate DNS validation.
 
-To install, first install let's encrypt (either on the root or in a virtualenv),
+## Installation - pip
+
+```bash
+pip install certbot
+pip install certbot-external-auth
+```
+
+## Manual Installation
+
+To install, first install certbot (either on the root or in a virtualenv),
 then:
 
-```
+```bash
 python setup.py install
 ```
 
+## Usage
+
 To use, try something like this:
 
-```
+```bash
 certbot --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
         -a certbot-external-auth:out \
