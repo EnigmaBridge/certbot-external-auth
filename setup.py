@@ -1,6 +1,8 @@
 from setuptools import setup
 from setuptools import find_packages
 
+version = '0.0.1'
+
 install_requires = [
     'acme',
     'certbot'
@@ -8,6 +10,7 @@ install_requires = [
 
 setup(
     name='certbot-external-auth',
+    version=version,
     description="External authenticator for Certbot",
     url='https://github.com/EnigmaBridge/certbot-external-auth',
     author="Dusan Klinec",
