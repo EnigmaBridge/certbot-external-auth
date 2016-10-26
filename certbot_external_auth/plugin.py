@@ -100,10 +100,12 @@ s.serve_forever()" """
             help="Test mode. Executes the manual command in subprocess.")
         add("public-ip-logging-ok", action="store_true",
             help="Automatically allows public IP logging.")
+        add("text-mode", action="store_true",
+            help="Original text mode, by default turned off, produces JSON challenges")
 
     def prepare(self):  # pylint: disable=missing-docstring,no-self-use
         if self.config.noninteractive_mode and not self.conf("test-mode"):
-            raise errors.PluginError("Running manual mode non-interactively is not supported")
+            raise errors.PluginError("Running manual mode non-interactively is not supported (yet)")
 
     def more_info(self):  # pylint: disable=missing-docstring,no-self-use
         return ("This plugin requires user's manual intervention in setting "
@@ -240,6 +242,15 @@ s.serve_forever()" """
         #         logger.debug("Manual command process already terminated "
         #                      "with %s code", self._httpd.returncode)
         #     shutil.rmtree(self._root)
+    def _is_text_mode(self):
+        return self.conf("text-mode")
+
+    def _json_out_and_wait(self, data):
+        # pylint: disable=no-self-use
+        json_str = json.dumps(data)
+        sys.stdout.write(json_str + '\n')
+        sys.stderr.flush()
+        six.moves.input("")
 
     def _notify_and_wait(self, message):
         # pylint: disable=no-self-use
