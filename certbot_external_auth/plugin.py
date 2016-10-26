@@ -190,9 +190,8 @@ s.serve_forever()" """
         if self._is_text_mode():
             self.orig_reporter.print_messages()
             return
-        no_exception = sys.exc_info()[0] is None
-        print no_exception
 
+        no_exception = sys.exc_info()[0] is None
         messages = []
         while not self.messages.empty():
             msg = self.messages.get()
