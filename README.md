@@ -155,7 +155,6 @@ Stdout:
 ## Example - Handler, DNS
 
 In this repository there is a default [handler-example.sh] which can be used as a handler.
-The Handler approach is demonstrated only on DNS example, others work as well.
 
 ```bash
 certbot --staging \
@@ -191,13 +190,11 @@ dns-01 challenge for stoke2.pki.enigmabridge.com
 dns-01 challenge for st2.pki.enigmabridge.com
 Handler output (pre-perform):
 
->> handler-example.sh: pre-perform
 -----BEGIN PRE-PERFORM-----
 -----END PRE-PERFORM-----
 
 Handler output (perform):
 
->> handler-example.sh: perform
 -----BEGIN PERFORM-----
 cmd: perform
 type: dns-01
@@ -215,7 +212,6 @@ json: {"cmd": "validate", "type": "dns-01", "validation": "qRd8tEFi1SjSLmx6TLnIw
 Self-verify of challenge failed.
 Handler output (perform):
 
->> handler-example.sh: perform
 -----BEGIN PERFORM-----
 cmd: perform
 type: dns-01
@@ -233,7 +229,6 @@ json: {"cmd": "validate", "type": "dns-01", "validation": "UfxAs6ZOlZKpg8Fr6lHiQ
 Self-verify of challenge failed.
 Handler output (post-perform):
 
->> handler-example.sh: post-perform
 -----BEGIN POST-PERFORM-----
 -----END POST-PERFORM-----
 
@@ -241,13 +236,11 @@ Waiting for verification...
 Cleaning up challenges
 Handler output (pre-cleanup):
 
->> handler-example.sh: pre-cleanup
 -----BEGIN PRE-CLEANUP-----
 -----END PRE-CLEANUP-----
 
 Handler output (cleanup):
 
->> handler-example.sh: cleanup
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: dns-01
@@ -260,7 +253,6 @@ json: {"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "jFLsUg
 
 Handler output (cleanup):
 
->> handler-example.sh: cleanup
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: dns-01
@@ -273,7 +265,6 @@ json: {"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "Xy7oP1
 
 Handler output (post-cleanup):
 
->> handler-example.sh: post-cleanup
 -----BEGIN POST-CLEANUP-----
 -----END POST-CLEANUP-----
 
@@ -318,13 +309,11 @@ http-01 challenge for stoke2.pki.enigmabridge.com
 http-01 challenge for st2.pki.enigmabridge.com
 Handler output (pre-perform):
 
->> handler-example.sh: pre-perform
 -----BEGIN PRE-PERFORM-----
 -----END PRE-PERFORM-----
 
 Handler output (perform):
 
->> handler-example.sh: perform
 -----BEGIN PERFORM-----
 cmd: perform
 type: http-01
@@ -344,7 +333,6 @@ Unable to reach http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/8U
 Self-verify of challenge failed.
 Handler output (perform):
 
->> handler-example.sh: perform
 -----BEGIN PERFORM-----
 cmd: perform
 type: http-01
@@ -364,7 +352,6 @@ Unable to reach http://st2.pki.enigmabridge.com/.well-known/acme-challenge/8ll4_
 Self-verify of challenge failed.
 Handler output (post-perform):
 
->> handler-example.sh: post-perform
 -----BEGIN POST-PERFORM-----
 -----END POST-PERFORM-----
 
@@ -372,13 +359,11 @@ Waiting for verification...
 Cleaning up challenges
 Handler output (pre-cleanup):
 
->> handler-example.sh: pre-cleanup
 -----BEGIN PRE-CLEANUP-----
 -----END PRE-CLEANUP-----
 
 Handler output (cleanup):
 
->> handler-example.sh: cleanup
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: http-01
@@ -391,7 +376,6 @@ json: {"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "8UHf1
 
 Handler output (cleanup):
 
->> handler-example.sh: cleanup
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: http-01
@@ -404,7 +388,6 @@ json: {"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "8ll4_
 
 Handler output (post-cleanup):
 
->> handler-example.sh: post-cleanup
 -----BEGIN POST-CLEANUP-----
 -----END POST-CLEANUP-----
 
@@ -449,13 +432,11 @@ tls-sni-01 challenge for stoke2.pki.enigmabridge.com
 tls-sni-01 challenge for st2.pki.enigmabridge.com
 Handler output (pre-perform):
 
->> handler-example.sh: pre-perform
 -----BEGIN PRE-PERFORM-----
 -----END PRE-PERFORM-----
 
 Handler output (perform):
 
->> handler-example.sh: perform
 -----BEGIN PERFORM-----
 cmd: perform
 type: tls-sni-01
@@ -473,7 +454,6 @@ json: {"cmd": "validate", "type": "tls-sni-01", "domain": "stoke2.pki.enigmabrid
 Self-verify of challenge failed.
 Handler output (perform):
 
->> handler-example.sh: perform
 -----BEGIN PERFORM-----
 cmd: perform
 type: tls-sni-01
@@ -491,7 +471,6 @@ json: {"cmd": "validate", "type": "tls-sni-01", "domain": "st2.pki.enigmabridge.
 Self-verify of challenge failed.
 Handler output (post-perform):
 
->> handler-example.sh: post-perform
 -----BEGIN POST-PERFORM-----
 -----END POST-PERFORM-----
 
@@ -499,13 +478,11 @@ Waiting for verification...
 Cleaning up challenges
 Handler output (pre-cleanup):
 
->> handler-example.sh: pre-cleanup
 -----BEGIN PRE-CLEANUP-----
 -----END PRE-CLEANUP-----
 
 Handler output (cleanup):
 
->> handler-example.sh: cleanup
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: tls-sni-01
@@ -518,7 +495,6 @@ json: {"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "HA
 
 Handler output (cleanup):
 
->> handler-example.sh: cleanup
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: tls-sni-01
@@ -531,7 +507,6 @@ json: {"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "D0
 
 Handler output (post-cleanup):
 
->> handler-example.sh: post-cleanup
 -----BEGIN POST-CLEANUP-----
 -----END POST-CLEANUP-----
 
