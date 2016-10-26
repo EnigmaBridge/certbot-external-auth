@@ -153,56 +153,57 @@ s.serve_forever()" """
                 self._cleanup_http01_challenge(achall)
 
     def _perform_http01_challenge(self, achall):
-        # same path for each challenge response would be easier for
-        # users, but will not work if multiple domains point at the
-        # same server: default command doesn't support virtual hosts
-        response, validation = achall.response_and_validation()
-
-        port = (response.port if self.config.http01_port is None
-                else int(self.config.http01_port))
-        command = self.CMD_TEMPLATE.format(
-            root=self._root, achall=achall, response=response,
-            # TODO(kuba): pipes still necessary?
-            validation=pipes.quote(validation),
-            encoded_token=achall.chall.encode("token"),
-            port=port)
-        if self.conf("test-mode"):
-            logger.debug("Test mode. Executing the manual command: %s", command)
-            # sh shipped with OS X does't support echo -n, but supports printf
-            try:
-                self._httpd = subprocess.Popen(
-                    command,
-                    # don't care about setting stdout and stderr,
-                    # we're in test mode anyway
-                    shell=True,
-                    executable=None,
-                    # "preexec_fn" is UNIX specific, but so is "command"
-                    preexec_fn=os.setsid)
-            except OSError as error:  # ValueError should not happen!
-                logger.debug(
-                    "Couldn't execute manual command: %s", error, exc_info=True)
-                return False
-            logger.debug("Manual command running as PID %s.", self._httpd.pid)
-            # give it some time to bootstrap, before we try to verify
-            # (cert generation in case of simpleHttpS might take time)
-            self._test_mode_busy_wait(port)
-
-            if self._httpd.poll() is not None:
-                raise errors.Error("Couldn't execute manual command")
-        else:
-            self._notify_and_wait(
-                self._get_message(achall).format(
-                    validation=validation,
-                    response=response,
-                    uri=achall.chall.uri(achall.domain),
-                    command=command))
-
-        if not response.simple_verify(
-                achall.chall, achall.domain,
-                achall.account_key.public_key(), self.config.http01_port):
-            logger.warning("Self-verify of challenge failed.")
-
-        return response
+        raise errors.PluginError("Not implemented yet")
+        # # same path for each challenge response would be easier for
+        # # users, but will not work if multiple domains point at the
+        # # same server: default command doesn't support virtual hosts
+        # response, validation = achall.response_and_validation()
+        #
+        # port = (response.port if self.config.http01_port is None
+        #         else int(self.config.http01_port))
+        # command = self.CMD_TEMPLATE.format(
+        #     root=self._root, achall=achall, response=response,
+        #     # TODO(kuba): pipes still necessary?
+        #     validation=pipes.quote(validation),
+        #     encoded_token=achall.chall.encode("token"),
+        #     port=port)
+        # if self.conf("test-mode"):
+        #     logger.debug("Test mode. Executing the manual command: %s", command)
+        #     # sh shipped with OS X does't support echo -n, but supports printf
+        #     try:
+        #         self._httpd = subprocess.Popen(
+        #             command,
+        #             # don't care about setting stdout and stderr,
+        #             # we're in test mode anyway
+        #             shell=True,
+        #             executable=None,
+        #             # "preexec_fn" is UNIX specific, but so is "command"
+        #             preexec_fn=os.setsid)
+        #     except OSError as error:  # ValueError should not happen!
+        #         logger.debug(
+        #             "Couldn't execute manual command: %s", error, exc_info=True)
+        #         return False
+        #     logger.debug("Manual command running as PID %s.", self._httpd.pid)
+        #     # give it some time to bootstrap, before we try to verify
+        #     # (cert generation in case of simpleHttpS might take time)
+        #     self._test_mode_busy_wait(port)
+        #
+        #     if self._httpd.poll() is not None:
+        #         raise errors.Error("Couldn't execute manual command")
+        # else:
+        #     self._notify_and_wait(
+        #         self._get_message(achall).format(
+        #             validation=validation,
+        #             response=response,
+        #             uri=achall.chall.uri(achall.domain),
+        #             command=command))
+        #
+        # if not response.simple_verify(
+        #         achall.chall, achall.domain,
+        #         achall.account_key.public_key(), self.config.http01_port):
+        #     logger.warning("Self-verify of challenge failed.")
+        #
+        # return response
 
     def _perform_dns01_challenge(self, achall):
         response, validation = achall.response_and_validation()
@@ -228,16 +229,17 @@ s.serve_forever()" """
 
     def _cleanup_http01_challenge(self, achall):
         # pylint: disable=missing-docstring,unused-argument
-        if self.conf("test-mode"):
-            assert self._httpd is not None, (
-                "cleanup() must be called after perform()")
-            if self._httpd.poll() is None:
-                logger.debug("Terminating manual command process")
-                os.killpg(self._httpd.pid, signal.SIGTERM)
-            else:
-                logger.debug("Manual command process already terminated "
-                             "with %s code", self._httpd.returncode)
-            shutil.rmtree(self._root)
+        raise errors.PluginError("Not implemented yet")
+        # if self.conf("test-mode"):
+        #     assert self._httpd is not None, (
+        #         "cleanup() must be called after perform()")
+        #     if self._httpd.poll() is None:
+        #         logger.debug("Terminating manual command process")
+        #         os.killpg(self._httpd.pid, signal.SIGTERM)
+        #     else:
+        #         logger.debug("Manual command process already terminated "
+        #                      "with %s code", self._httpd.returncode)
+        #     shutil.rmtree(self._root)
 
     def _notify_and_wait(self, message):
         # pylint: disable=no-self-use
