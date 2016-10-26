@@ -26,6 +26,7 @@ from acme.jose import b64
 from certbot import errors
 from certbot import interfaces
 from certbot import util
+from certbot import reverter
 from certbot.plugins import common
 
 
@@ -74,7 +75,16 @@ If you don't have HTTP server configured, you can run the following
 command on the target server (as root):
 
 {command}
-"""}
+""",
+        "tls-sni-01": """\
+Verification for {domain}:
+Make sure your web server serves TLS SNI host on domain:
+{z_domain} with the following
+- certificate: {cert_path}
+- key: {key_path}
+
+"""
+    }
 
     # a disclaimer about your current IP being transmitted to Let's Encrypt's servers.
     IP_DISCLAIMER = """\
@@ -117,6 +127,10 @@ s.serve_forever()" """
                       else "/tmp/certbot")
         self._httpd = None
 
+        # Set up reverter
+        self.reverter = reverter.Reverter(self.config)
+        self.reverter.recovery_routine()
+
         # Reporter
         self.orig_reporter = None
         self.messages = queue.PriorityQueue()
@@ -153,13 +167,15 @@ s.serve_forever()" """
 
     def get_chall_pref(self, domain):
         # pylint: disable=missing-docstring,no-self-use,unused-argument
-        return [challenges.DNS01, challenges.HTTP01]
+        return [challenges.DNS01, challenges.HTTP01, challenges.TLSSNI01]
 
     def perform(self, achalls):
         # pylint: disable=missing-docstring
         self._get_ip_logging_permission()
         mapping = {"http-01": self._perform_http01_challenge,
-                   "dns-01": self._perform_dns01_challenge}
+                   "dns-01": self._perform_dns01_challenge,
+                   "tls-sni-01": self._perform_tlssni01_challenge,
+                   }
         responses = []
         # TODO: group achalls by the same socket.gethostbyname(_ex)
         # and prompt only once per server (one "echo -n" per domain)
@@ -341,13 +357,13 @@ s.serve_forever()" """
             elif self._is_json_mode():
                 data = OrderedDict()
                 data['cmd'] = 'validate'
-                data['type'] = 'http'
+                data['type'] = achall.chall.typ
                 data['validation'] = validation
                 data['uri'] = achall.chall.uri(achall.domain)
                 data['command'] = command
                 data['key-auth'] = response.key_authorization
                 self._json_out_and_wait(data)
-                
+
             else:
                 raise errors.PluginError("Unknown mode selected")
 
@@ -372,7 +388,7 @@ s.serve_forever()" """
             elif self._is_json_mode():
                 data = OrderedDict()
                 data['cmd'] = 'validate'
-                data['type'] = 'dns'
+                data['type'] = achall.chall.typ
                 data['validation'] = validation
                 data['domain'] = achall.validation_domain_name(achall.domain)
                 data['key-auth'] = response.key_authorization
@@ -393,6 +409,65 @@ s.serve_forever()" """
                 logger.warning("Self-verify of challenge failed.")
 
         return response
+
+    def _perform_tlssni01_challenge(self, achall):
+        response_orig, validation = achall.response_and_validation()
+        tls_help = self._get_tls_help(achall)
+        response = tls_help._setup_challenge_cert(achall)
+
+        if self._is_text_mode():
+            self._notify_and_wait(
+                self._get_message(achall).format(
+                    domain = achall.domain,
+                    z_domain = achall.response(achall.account_key).z_domain,
+                    cert_path = tls_help.get_cert_path(achall),
+                    key_path = tls_help.get_key_path(achall),
+                    port = str(self.config.tls_sni_01_port)))
+
+        elif self._is_json_mode():
+            data = OrderedDict()
+            data['cmd'] = 'validate'
+            data['type'] = achall.chall.typ
+            data['domain'] = achall.domain
+            data['z_domain'] = achall.response(achall.account_key).z_domain
+            data['cert_path'] = tls_help.get_cert_path(achall)
+            data['key_path'] = tls_help.get_key_path(achall)
+            data['port'] = str(self.config.tls_sni_01_port)
+            data['key-auth'] = response.key_authorization
+            data['cert_pem'] = None
+            data['key_pem'] = None
+
+            try:
+                with open(data['cert_path'], 'r') as fh:
+                    data['cert_pem'] = fh.read()
+            except:
+                raise
+                pass
+
+            try:
+                with open(data['key_path'], 'r') as fh:
+                    data['key_pem'] = fh.read()
+            except:
+                raise
+                pass
+
+            self._json_out_and_wait(data)
+
+        else:
+            raise errors.PluginError("Unknown mode selected")
+
+        if not response.simple_verify(
+                achall.chall, achall.domain,
+                achall.account_key.public_key(),
+                None):
+            logger.warning("Self-verify of challenge failed.")
+
+        return response
+
+    def _get_tls_help(self, achall):
+        tls_help = common.TLSSNI01(self)
+        tls_help.add_chall(achall, 0)
+        return tls_help
 
     def _cleanup_http01_challenge(self, achall):
         # pylint: disable=missing-docstring,unused-argument
