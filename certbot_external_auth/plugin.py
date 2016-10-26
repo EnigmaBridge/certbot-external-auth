@@ -10,7 +10,10 @@ import sys
 import tempfile
 import time
 import json
+import collections
 from collections import OrderedDict
+import atexit
+from six.moves import queue  # pylint: disable=import-error
 
 import six
 import zope.component
@@ -21,14 +24,19 @@ from acme import errors as acme_errors
 
 from certbot import errors
 from certbot import interfaces
+from certbot import util
 from certbot.plugins import common
 
 
 logger = logging.getLogger(__name__)
 
 
+INITIAL_PID = os.getpid()
+
+
 @zope.interface.implementer(interfaces.IAuthenticator)
 @zope.interface.provider(interfaces.IPluginFactory)
+@zope.interface.implementer(interfaces.IReporter)
 class AuthenticatorOut(common.Plugin):
     """Manual Authenticator.
 
@@ -40,9 +48,9 @@ class AuthenticatorOut(common.Plugin):
     .. todo:: Support for `~.challenges.TLSSNI01`.
 
     """
-    hidden = True
+    hidden = False
 
-    description = "Manually configure an HTTP server"
+    description = "Manual challenge solver"
 
     MESSAGE_TEMPLATE = {
         "dns-01": """\
@@ -90,11 +98,25 @@ s = BaseHTTPServer.HTTPServer(('', {port}), SimpleHTTPServer.SimpleHTTPRequestHa
 s.serve_forever()" """
     """Command template."""
 
+    # Reporter stuff
+    HIGH_PRIORITY = 0
+    """High priority constant. See `add_message`."""
+    MEDIUM_PRIORITY = 1
+    """Medium priority constant. See `add_message`."""
+    LOW_PRIORITY = 2
+    """Low priority constant. See `add_message`."""
+
+    _msg_type = collections.namedtuple('ReporterMsg', 'priority text on_crash')
+
     def __init__(self, *args, **kwargs):
         super(AuthenticatorOut, self).__init__(*args, **kwargs)
         self._root = (tempfile.mkdtemp() if self.conf("test-mode")
                       else "/tmp/certbot")
         self._httpd = None
+
+        # Reporter
+        self.orig_reporter = None
+        self.messages = queue.PriorityQueue()
 
     @classmethod
     def add_parser_arguments(cls, add):
@@ -106,6 +128,12 @@ s.serve_forever()" """
             help="Original text mode, by default turned off, produces JSON challenges")
 
     def prepare(self):  # pylint: disable=missing-docstring,no-self-use
+        # Re-register reporter
+        self.orig_reporter = zope.component.getUtility(interfaces.IReporter)
+        zope.component.provideUtility(self, provides=interfaces.IReporter)
+        atexit.register(self.atexit_print_messages)
+
+        # Non-interactive not yet supported
         if self.config.noninteractive_mode and not self.conf("test-mode"):
             raise errors.PluginError("Running manual mode non-interactively is not supported (yet)")
 
@@ -135,6 +163,69 @@ s.serve_forever()" """
         for achall in achalls:
             responses.append(mapping[achall.typ](achall))
         return responses
+
+    def add_message(self, msg, priority, on_crash=True):
+        """Adds msg to the list of messages to be printed.
+
+        :param str msg: Message to be displayed to the user.
+
+        :param int priority: One of HIGH_PRIORITY, MEDIUM_PRIORITY, or
+            LOW_PRIORITY.
+
+        :param bool on_crash: Whether or not the message should be printed if
+            the program exits abnormally.
+
+        """
+        if self._is_text_mode():
+            self.orig_reporter.add_message(msg, priority, on_crash=on_crash)
+            return
+
+        assert self.HIGH_PRIORITY <= priority <= self.LOW_PRIORITY
+        self.messages.put(self._msg_type(priority, msg, on_crash))
+        logger.debug("Reporting to user: %s", msg)
+        pass
+
+    def print_messages(self):
+        """Prints messages to the user and clears the message queue."""
+        if self._is_text_mode():
+            self.orig_reporter.print_messages()
+            return
+        no_exception = sys.exc_info()[0] is None
+        print no_exception
+
+        messages = []
+        while not self.messages.empty():
+            msg = self.messages.get()
+            if self.config.quiet:
+                # In --quiet mode, we only print high priority messages that
+                # are flagged for crash cases
+                if not (msg.priority == self.HIGH_PRIORITY and msg.on_crash):
+                    continue
+            if no_exception or msg.on_crash:
+                cur_message = OrderedDict()
+                cur_message['priority'] = msg.priority
+                cur_message['on_crash'] = msg.on_crash
+                cur_message['lines'] = msg.text.splitlines()
+                messages.append(cur_message)
+
+        data = OrderedDict()
+        data['cmd'] = 'report'
+        data['messages'] = messages
+        self._json_out(data, True)
+        pass
+
+    def atexit_print_messages(self, pid=None):
+        """Function to be registered with atexit to print messages.
+
+        :param int pid: Process ID
+
+        """
+        if pid is None:
+            pid = INITIAL_PID
+        # This ensures that messages are only printed from the process that
+        # created the Reporter.
+        if pid == os.getpid():
+            self.print_messages()
 
     @classmethod
     def _test_mode_busy_wait(cls, port):
@@ -310,3 +401,4 @@ s.serve_forever()" """
     def _get_message(self, achall):
         # pylint: disable=missing-docstring,no-self-use,unused-argument
         return self.MESSAGE_TEMPLATE.get(achall.chall.typ, "")
+
