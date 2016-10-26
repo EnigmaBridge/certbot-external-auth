@@ -1,4 +1,4 @@
-"""Manual plugin."""
+"""Manual plugin on stereoids."""
 import os
 import logging
 import pipes
@@ -241,11 +241,10 @@ s.serve_forever()" """
 
     def _notify_and_wait(self, message):
         # pylint: disable=no-self-use
-        # TODO: IDisplay wraps messages, breaking the command
-        #answer = zope.component.getUtility(interfaces.IDisplay).notification(
-        #    message=message, pause=True)
         sys.stdout.write(message)
-        six.moves.input("Press ENTER to continue")
+        sys.stdout.write("Press ENTER to continue")
+        sys.stdout.flush()
+        six.moves.input("")
 
     def _get_ip_logging_permission(self):
         # pylint: disable=missing-docstring
