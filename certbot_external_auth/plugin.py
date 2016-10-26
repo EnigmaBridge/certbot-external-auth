@@ -309,8 +309,6 @@ s.serve_forever()" """
         return cur_record
 
     def _perform_http01_challenge(self, achall):
-        # raise errors.PluginError("Not implemented yet")
-
         # same path for each challenge response would be easier for
         # users, but will not work if multiple domains point at the
         # same server: default command doesn't support virtual hosts
