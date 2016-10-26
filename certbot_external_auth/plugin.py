@@ -9,6 +9,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import json
+from collections import OrderedDict
 
 import six
 import zope.component
@@ -209,12 +211,21 @@ s.serve_forever()" """
 
     def _perform_dns01_challenge(self, achall):
         response, validation = achall.response_and_validation()
+
         if not self.conf("test-mode"):
-            self._notify_and_wait(
-                self._get_message(achall).format(
-                    validation=validation,
-                    domain=achall.validation_domain_name(achall.domain),
-                    response=response))
+            if self._is_text_mode():
+                self._notify_and_wait(
+                    self._get_message(achall).format(
+                        validation=validation,
+                        domain=achall.validation_domain_name(achall.domain),
+                        response=response))
+            else:
+                data = OrderedDict()
+                data['cmd'] = 'validate'
+                data['type'] = 'dns'
+                data['validation'] = validation
+                data['domain'] = achall.validation_domain_name(achall.domain)
+                self._json_out_and_wait(data)
 
         try:
             verification_status = response.simple_verify(
