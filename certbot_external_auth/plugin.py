@@ -316,12 +316,22 @@ s.serve_forever()" """
         response, validation = achall.response_and_validation()
         port = (response.port if self.config.http01_port is None
                 else int(self.config.http01_port))
+
         command = self.CMD_TEMPLATE.format(
             root=self._root, achall=achall, response=response,
             # TODO(kuba): pipes still necessary?
             validation=pipes.quote(validation),
             encoded_token=achall.chall.encode("token"),
             port=port)
+
+        json_data = OrderedDict()
+        json_data['cmd'] = 'validate'
+        json_data['type'] = achall.chall.typ
+        json_data['validation'] = validation
+        json_data['uri'] = achall.chall.uri(achall.domain)
+        json_data['command'] = command
+        json_data['key-auth'] = response.key_authorization
+
         if self.conf("test-mode"):
             logger.debug("Test mode. Executing the manual command: %s", command)
             # sh shipped with OS X does't support echo -n, but supports printf
@@ -355,14 +365,7 @@ s.serve_forever()" """
                         command=command))
 
             elif self._is_json_mode():
-                data = OrderedDict()
-                data['cmd'] = 'validate'
-                data['type'] = achall.chall.typ
-                data['validation'] = validation
-                data['uri'] = achall.chall.uri(achall.domain)
-                data['command'] = command
-                data['key-auth'] = response.key_authorization
-                self._json_out_and_wait(data)
+                self._json_out_and_wait(json_data)
 
             else:
                 raise errors.PluginError("Unknown mode selected")
@@ -377,22 +380,23 @@ s.serve_forever()" """
     def _perform_dns01_challenge(self, achall):
         response, validation = achall.response_and_validation()
 
+        json_data = OrderedDict()
+        json_data['cmd'] = 'validate'
+        json_data['type'] = achall.chall.typ
+        json_data['validation'] = validation
+        json_data['domain'] = achall.validation_domain_name(achall.domain)
+        json_data['key-auth'] = response.key_authorization
+
         if not self.conf("test-mode"):
             if self._is_text_mode():
                 self._notify_and_wait(
                     self._get_message(achall).format(
-                        validation=validation,
-                        domain=achall.validation_domain_name(achall.domain),
+                        validation=json_data['validation'],
+                        domain=json_data['domain'],
                         response=response))
 
             elif self._is_json_mode():
-                data = OrderedDict()
-                data['cmd'] = 'validate'
-                data['type'] = achall.chall.typ
-                data['validation'] = validation
-                data['domain'] = achall.validation_domain_name(achall.domain)
-                data['key-auth'] = response.key_authorization
-                self._json_out_and_wait(data)
+                self._json_out_and_wait(json_data)
 
             else:
                 raise errors.PluginError("Unknown mode selected")
@@ -412,44 +416,42 @@ s.serve_forever()" """
 
     def _perform_tlssni01_challenge(self, achall):
         response_orig, validation = achall.response_and_validation()
-        tls_help = self._get_tls_help(achall)
+        tls_help = self._get_tls_sni_help(achall)
         response = tls_help._setup_challenge_cert(achall)
+
+        json_data = OrderedDict()
+        json_data['cmd'] = 'validate'
+        json_data['type'] = achall.chall.typ
+        json_data['domain'] = achall.domain
+        json_data['z_domain'] = achall.response(achall.account_key).z_domain
+        json_data['cert_path'] = tls_help.get_cert_path(achall)
+        json_data['key_path'] = tls_help.get_key_path(achall)
+        json_data['port'] = str(self.config.tls_sni_01_port)
+        json_data['key-auth'] = response.key_authorization
+        json_data['cert_pem'] = None
+        json_data['key_pem'] = None
+        try:
+            with open(json_data['cert_path'], 'r') as fh:
+                json_data['cert_pem'] = fh.read()
+        except:
+            pass
+        try:
+            with open(json_data['key_path'], 'r') as fh:
+                json_data['key_pem'] = fh.read()
+        except:
+            pass
 
         if self._is_text_mode():
             self._notify_and_wait(
                 self._get_message(achall).format(
-                    domain = achall.domain,
-                    z_domain = achall.response(achall.account_key).z_domain,
-                    cert_path = tls_help.get_cert_path(achall),
-                    key_path = tls_help.get_key_path(achall),
-                    port = str(self.config.tls_sni_01_port)))
+                    domain = json_data['domain'],
+                    z_domain = json_data['z_domain'],
+                    cert_path = json_data['cert_path'],
+                    key_path = json_data['key_path'],
+                    port = json_data['port']))
 
         elif self._is_json_mode():
-            data = OrderedDict()
-            data['cmd'] = 'validate'
-            data['type'] = achall.chall.typ
-            data['domain'] = achall.domain
-            data['z_domain'] = achall.response(achall.account_key).z_domain
-            data['cert_path'] = tls_help.get_cert_path(achall)
-            data['key_path'] = tls_help.get_key_path(achall)
-            data['port'] = str(self.config.tls_sni_01_port)
-            data['key-auth'] = response.key_authorization
-            data['cert_pem'] = None
-            data['key_pem'] = None
-
-            try:
-                with open(data['cert_path'], 'r') as fh:
-                    data['cert_pem'] = fh.read()
-            except:
-                pass
-
-            try:
-                with open(data['key_path'], 'r') as fh:
-                    data['key_pem'] = fh.read()
-            except:
-                pass
-
-            self._json_out_and_wait(data)
+            self._json_out_and_wait(json_data)
 
         else:
             raise errors.PluginError("Unknown mode selected")
@@ -462,7 +464,7 @@ s.serve_forever()" """
 
         return response
 
-    def _get_tls_help(self, achall):
+    def _get_tls_sni_help(self, achall):
         tls_help = common.TLSSNI01(self)
         tls_help.add_chall(achall, 0)
         return tls_help
