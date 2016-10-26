@@ -15,8 +15,9 @@ python setup.py install
 To use, try something like this:
 
 ```
-certbot --agree-tos --agree-dev-preview \
+certbot --agree-tos --email you@example.com \
         -a certbot-external-auth:out \
+        --certbot-external-auth:out-public-ip-logging-ok \
         -d example.com certonly
 ```
 
