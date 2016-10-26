@@ -23,6 +23,23 @@ certbot --agree-tos --email you@example.com \
 
 This plugin only supports authentication, not installation.
 
+Currently it produces one-line JSON with challenge to process by the script 
+on the stdout. After the challenge is processed, external process is supposed
+to send a new line to continue with the process.
+
+## Example 
+
+TBD.
+
+## Future work
+
+* Communicate challenges via named pipes
+* Communicate challenges via sockets
+* Call an external script with the challenges in parameter
+
+
+## About
+
 Loosely based on the Let's Encrypt nginx plugin and [certbot-external]
 
 Once ticket [2782] is resolved this won't be needed. 
