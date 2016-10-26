@@ -262,8 +262,9 @@ s.serve_forever()" """
     def cleanup(self, achalls):
         # pylint: disable=missing-docstring
         for achall in achalls:
+            cur_record = self._get_cleanup_json(achall)
+
             if self._is_json_mode():
-                cur_record = self._get_cleanup_json(achall)
                 self._json_out(cur_record, True)
 
             if isinstance(achall.chall, challenges.HTTP01):
