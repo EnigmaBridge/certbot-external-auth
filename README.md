@@ -15,7 +15,8 @@ python setup.py install
 To use, try something like this:
 
 ```
-certbot --agree-tos --email you@example.com \
+certbot --text --agree-tos --email you@example.com \
+        --expand --renew-by-default \
         -a certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d example.com certonly
@@ -29,7 +30,22 @@ to send a new line to continue with the process.
 
 ## Example 
 
-TBD.
+```
+ertbot --text --agree-tos --email you@example.com \
+        --expand --renew-by-default \
+        -a certbot-external-auth:out \
+        --preferred-challenges dns \
+        --certbot-external-auth:out-public-ip-logging-ok \
+        -d "stoke2.pki.enigmabridge.com" \
+        -d "st2.pki.enigmabridge.com" \
+        certonly 2>/dev/null
+
+{"cmd": "validate", "type": "dns", "validation": "rYIS1e4mFCsJXN43LMq_fnFptIfoLC4RhbJABfT2_78", "domain": "_acme-challenge.stoke2.pki.enigmabridge.com", "key-auth": "3R11yWg6DT6NECoroLK3J4p5ge770rBLym5ihSVEePU.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s"}
+
+{"cmd": "validate", "type": "dns", "validation": "mZ3WMFp8thovIMqfMFdvm3Lzfv90hNAl3633Bm2-PrQ", "domain": "_acme-challenge.st2.pki.enigmabridge.com", "key-auth": "k5zcovdyhgPgZsmiQE2QMBJHFKMT5qRjVCCSawmycYY.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s"}
+
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: st2.pki.enigmabridge.com", "Type:   connection", "Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.st2.pki.enigmabridge.com", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   connection", "Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.stoke2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address. Additionally, please check that your computer has a publicly routable IP address and that no firewalls are preventing the server from communicating with the client. If you're using the webroot plugin, you should also verify that you are serving files from the webroot path you provided."]}]}
+```
 
 ## Future work
 
