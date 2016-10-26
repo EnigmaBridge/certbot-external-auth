@@ -118,7 +118,7 @@ s.serve_forever()" """
 
     def get_chall_pref(self, domain):
         # pylint: disable=missing-docstring,no-self-use,unused-argument
-        return [challenges.HTTP01, challenges.DNS01]
+        return [challenges.DNS01, challenges.HTTP01]
 
     def perform(self, achalls):
         # pylint: disable=missing-docstring
