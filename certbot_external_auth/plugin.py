@@ -441,14 +441,12 @@ s.serve_forever()" """
                 with open(data['cert_path'], 'r') as fh:
                     data['cert_pem'] = fh.read()
             except:
-                raise
                 pass
 
             try:
                 with open(data['key_path'], 'r') as fh:
                     data['key_pem'] = fh.read()
             except:
-                raise
                 pass
 
             self._json_out_and_wait(data)
