@@ -37,9 +37,14 @@ This plugin only supports authentication, not installation.
 
 Currently it produces one-line JSON with challenge to process by the script 
 on the stdout. After the challenge is processed, external process is supposed
-to send a new line to continue with the process.
+to send a new line `\n` character to the stdin to continue with the process.
+
+Reporter was substituted to produce JSON logs so stdout is JSON only.
 
 ## Example 
+
+In the examples below I did not solve the challenges so the reporter prints 
+out an error. The error is indicated also by returning non-zero return code.
 
 Run the certbot with the following command:
 
