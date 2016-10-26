@@ -515,7 +515,7 @@ s.serve_forever()" """
             self.config.namespace.manual_public_ip_logging_ok = True
             return
 
-        if self.config.noninteractive_mode:
+        if self.config.noninteractive_mode or (self._is_json_mode() and not self.conf("public-ip-logging-ok")):
             raise errors.PluginError("Must agree to IP logging to proceed")
 
         if not (self.conf("test-mode") or self.conf("public-ip-logging-ok")):
