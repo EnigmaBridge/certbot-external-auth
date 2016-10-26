@@ -64,10 +64,13 @@ Reporter was substituted to produce JSON logs so stdout is JSON only.
         Arguments are sent in ENV.
 ```
 
-## Example 
-
+## Examples
 In the examples below I did not solve the challenges so the reporter prints 
 out an error. The error is indicated also by returning non-zero return code.
+
+The particular examples for verification methods and handler follows.
+
+### Example - DNS
 
 Run the certbot with the following command:
 
@@ -99,7 +102,7 @@ Stdout:
 
 After `{"cmd": "validate"}` message the client waits on `\n` on the standard input to continue with the validation.
 
-## Example - HTTP
+### Example - HTTP
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -127,7 +130,7 @@ Stdout:
 {"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
 ```
 
-## Example - TLS-SNI
+### Example - TLS-SNI
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -155,7 +158,7 @@ Stdout:
 {"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
 ```
 
-## Example - Handler, DNS
+### Example - Handler, DNS
 
 In this repository there is a default [handler-example.sh] which can be used as a handler.
 
@@ -274,7 +277,7 @@ Handler output (post-cleanup):
 Failed authorization procedure. stoke2.pki.enigmabridge.com (dns-01): urn:acme:error:connection :: The server could not connect to the client to verify the domain :: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.stoke2.pki.enigmabridge.com, st2.pki.enigmabridge.com (dns-01): urn:acme:error:connection :: The server could not connect to the client to verify the domain :: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.st2.pki.enigmabridge.com
 ```
 
-## Example - Handler, HTTP
+### Example - Handler, HTTP
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -397,7 +400,7 @@ Handler output (post-cleanup):
 Failed authorization procedure. st2.pki.enigmabridge.com (http-01): urn:acme:error:unknownHost :: The server could not resolve a domain name :: No valid IP addresses found for st2.pki.enigmabridge.com, stoke2.pki.enigmabridge.com (http-01): urn:acme:error:unknownHost :: The server could not resolve a domain name :: No valid IP addresses found for stoke2.pki.enigmabridge.com
 ```
 
-## Example - Handler, TLS-SNI
+### Example - Handler, TLS-SNI
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
