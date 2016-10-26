@@ -1,7 +1,7 @@
 ## External authenticator for Certbot
 
 This plugin helps with domain validation process by calling external 
-program (TODO) or by printing JSON challenge for invoker to solve.
+program (TODO) or by printing JSON challenge to stdout for invoker to solve.
 
 The plugin is designed mainly to automate the DNS validation.
 
