@@ -47,8 +47,6 @@ class AuthenticatorOut(common.Plugin):
     run as a privileged process. Alternatively shows instructions on how
     to use Python's built-in HTTP server.
 
-    .. todo:: Support for `~.challenges.TLSSNI01`.
-
     Script is also based on https://github.com/marcan/certbot-external
 
     """
