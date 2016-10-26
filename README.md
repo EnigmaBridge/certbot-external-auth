@@ -68,6 +68,31 @@ Stdout:
 
 After `{"cmd": "validate"}` message the client waits on `\n` on the standard input to continue with the validation.
 
+## Example - HTTP
+
+Run the certbot with the following command (just `preferred-challenges` changed):
+
+```bash
+certbot --text --agree-tos --email you@example.com \
+        --expand --renew-by-default \
+        -a certbot-external-auth:out \
+        --preferred-challenges http \
+        --certbot-external-auth:out-public-ip-logging-ok \
+        -d "stoke2.pki.enigmabridge.com" \
+        -d "st2.pki.enigmabridge.com" \
+        certonly 2>/dev/null
+```
+
+Stdout:
+
+```json
+{"cmd": "validate", "type": "http", "validation": "oaWcu_EUAH9ZUQVyM2lHtNUK27DI0fvuckCEtGMKwcQ.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s", "uri": "http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/oaWcu_EUAH9ZUQVyM2lHtNUK27DI0fvuckCEtGMKwcQ", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" oaWcu_EUAH9ZUQVyM2lHtNUK27DI0fvuckCEtGMKwcQ.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s > .well-known/acme-challenge/oaWcu_EUAH9ZUQVyM2lHtNUK27DI0fvuckCEtGMKwcQ\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key-auth": "oaWcu_EUAH9ZUQVyM2lHtNUK27DI0fvuckCEtGMKwcQ.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s"}
+
+{"cmd": "validate", "type": "http", "validation": "p0yw7Xy5koErnMUjFTZFGCXD0wc778Q9QRj62-s6R5Q.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s", "uri": "http://st2.pki.enigmabridge.com/.well-known/acme-challenge/p0yw7Xy5koErnMUjFTZFGCXD0wc778Q9QRj62-s6R5Q", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" p0yw7Xy5koErnMUjFTZFGCXD0wc778Q9QRj62-s6R5Q.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s > .well-known/acme-challenge/p0yw7Xy5koErnMUjFTZFGCXD0wc778Q9QRj62-s6R5Q\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key-auth": "p0yw7Xy5koErnMUjFTZFGCXD0wc778Q9QRj62-s6R5Q.SVZszZ-QbTXxaiRH9L6Z3RhEFnoRY-gghCmujuGnY5s"}
+
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
+```
+
 ## Future work
 
 * Communicate challenges via named pipes
