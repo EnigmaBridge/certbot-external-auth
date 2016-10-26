@@ -342,6 +342,9 @@ s.serve_forever()" """
                 data['command'] = command
                 data['key-auth'] = response.key_authorization
                 self._json_out_and_wait(data)
+                
+            else:
+                raise errors.PluginError("Unknown mode selected")
 
         if not response.simple_verify(
                 achall.chall, achall.domain,
@@ -369,6 +372,9 @@ s.serve_forever()" """
                 data['domain'] = achall.validation_domain_name(achall.domain)
                 data['key-auth'] = response.key_authorization
                 self._json_out_and_wait(data)
+
+            else:
+                raise errors.PluginError("Unknown mode selected")
 
         try:
             verification_status = response.simple_verify(
