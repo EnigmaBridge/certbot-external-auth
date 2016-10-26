@@ -41,7 +41,8 @@ out an error. The error is indicated also by returning non-zero return code.
 Run the certbot with the following command:
 
 ```bash
-certbot --text --agree-tos --email you@example.com \
+certbot --staging \
+        --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
         -a certbot-external-auth:out \
         --preferred-challenges dns \
@@ -72,7 +73,8 @@ After `{"cmd": "validate"}` message the client waits on `\n` on the standard inp
 Run the certbot with the following command (just `preferred-challenges` changed):
 
 ```bash
-certbot --text --agree-tos --email you@example.com \
+certbot --staging \
+        --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
         -a certbot-external-auth:out \
         --preferred-challenges http \
@@ -99,7 +101,8 @@ Stdout:
 Run the certbot with the following command (just `preferred-challenges` changed):
 
 ```bash
-certbot --text --agree-tos --email you@example.com \
+certbot --staging \
+        --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
         -a certbot-external-auth:out \
         --preferred-challenges tls-sni \
