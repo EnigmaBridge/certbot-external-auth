@@ -8,8 +8,6 @@ set -e
 cmd="$1"
 shift
 
-echo ">> handler-example.sh: ${cmd}" 1>&2
-
 case "$cmd" in
     pre-perform)
         echo "-----BEGIN PRE-PERFORM-----" 1>&2
