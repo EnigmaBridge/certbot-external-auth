@@ -1,24 +1,15 @@
 ## External authenticator for Certbot
 
 This plugin helps with domain validation process by calling external 
-program or by printing JSON for the
+program (TODO) or by printing JSON challenge for invoker to solve.
 
-The plugin is designed mainly to automate DNS validation.
+The plugin is designed mainly to automate the DNS validation.
 
 ## Installation - pip
 
 ```bash
 pip install certbot
 pip install certbot-external-auth
-```
-
-## Manual Installation
-
-To install, first install certbot (either on the root or in a virtualenv),
-then:
-
-```bash
-python setup.py install
 ```
 
 ## Usage
@@ -104,6 +95,14 @@ Stdout:
 * Communicate challenges via sockets
 * Call an external script with the challenges in parameter
 
+## Manual Installation
+
+To install, first install certbot (either on the root or in a virtualenv),
+then:
+
+```bash
+python setup.py install
+```
 
 ## About
 
