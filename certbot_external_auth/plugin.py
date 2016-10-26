@@ -247,44 +247,49 @@ s.serve_forever()" """
         # pylint: disable=missing-docstring
         for achall in achalls:
             if self._is_json_mode():
-                cur_record = OrderedDict()
-                cur_record['cmd'] = 'cleanup'
-                cur_record['type'] = None
-                if isinstance(achall.chall, challenges.HTTP01):
-                    cur_record['type'] = 'http'
-                elif isinstance(achall.chall, challenges.DNS01):
-                    cur_record['type'] = 'dns'
-                elif isinstance(achall.chall, challenges.TLSSNI01):
-                    cur_record['type'] = 'tlssni'
-
-                cur_record['status'] = None
-                cur_record['token'] = b64.b64encode(achall.chall.token)
-                cur_record['domain'] = achall.domain
-                cur_record['validated'] = None
-                cur_record['error'] = None
-
-                if achall.status is not None:
-                    try:
-                        cur_record['status'] = achall.status.name
-                    except:
-                        pass
-
-                if achall.error is not None:
-                    try:
-                        cur_record['error'] = str(achall.error)
-                    except:
-                        cur_record['error'] = 'ERROR'
-
-                if achall.validated is not None:
-                    try:
-                        cur_record['validated'] = str(achall.validated)
-                    except:
-                        cur_record['validated'] = 'ERROR'
-
+                cur_record = self._get_cleanup_json(achall)
                 self._json_out(cur_record, True)
 
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
+
+    def _get_cleanup_json(self, achall):
+        cur_record = OrderedDict()
+        cur_record['cmd'] = 'cleanup'
+        cur_record['type'] = achall.chall.typ
+
+        if isinstance(achall.chall, challenges.HTTP01):
+            pass
+        elif isinstance(achall.chall, challenges.DNS01):
+            pass
+        elif isinstance(achall.chall, challenges.TLSSNI01):
+            pass
+
+        cur_record['status'] = None
+        cur_record['token'] = b64.b64encode(achall.chall.token)
+        cur_record['domain'] = achall.domain
+        cur_record['validated'] = None
+        cur_record['error'] = None
+
+        if achall.status is not None:
+            try:
+                cur_record['status'] = achall.status.name
+            except:
+                pass
+
+        if achall.error is not None:
+            try:
+                cur_record['error'] = str(achall.error)
+            except:
+                cur_record['error'] = 'ERROR'
+
+        if achall.validated is not None:
+            try:
+                cur_record['validated'] = str(achall.validated)
+            except:
+                cur_record['validated'] = 'ERROR'
+
+        return cur_record
 
     def _perform_http01_challenge(self, achall):
         # raise errors.PluginError("Not implemented yet")
