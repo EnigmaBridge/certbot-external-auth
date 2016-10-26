@@ -329,7 +329,7 @@ s.serve_forever()" """
         json_data['validation'] = validation
         json_data['uri'] = achall.chall.uri(achall.domain)
         json_data['command'] = command
-        json_data['key-auth'] = response.key_authorization
+        json_data['key_auth'] = response.key_authorization
 
         if self.conf("test-mode"):
             logger.debug("Test mode. Executing the manual command: %s", command)
@@ -384,7 +384,7 @@ s.serve_forever()" """
         json_data['type'] = achall.chall.typ
         json_data['validation'] = validation
         json_data['domain'] = achall.validation_domain_name(achall.domain)
-        json_data['key-auth'] = response.key_authorization
+        json_data['key_auth'] = response.key_authorization
 
         if not self.conf("test-mode"):
             if self._is_text_mode():
@@ -426,7 +426,7 @@ s.serve_forever()" """
         json_data['cert_path'] = tls_help.get_cert_path(achall)
         json_data['key_path'] = tls_help.get_key_path(achall)
         json_data['port'] = str(self.config.tls_sni_01_port)
-        json_data['key-auth'] = response.key_authorization
+        json_data['key_auth'] = response.key_authorization
         json_data['cert_pem'] = None
         json_data['key_pem'] = None
         try:
