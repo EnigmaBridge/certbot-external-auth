@@ -292,7 +292,8 @@ s.serve_forever()" """
                         response=response,
                         uri=achall.chall.uri(achall.domain),
                         command=command))
-            else:
+
+            elif self._is_json_mode():
                 data = OrderedDict()
                 data['cmd'] = 'validate'
                 data['type'] = 'http'
@@ -319,7 +320,8 @@ s.serve_forever()" """
                         validation=validation,
                         domain=achall.validation_domain_name(achall.domain),
                         response=response))
-            else:
+                
+            elif self._is_json_mode():
                 data = OrderedDict()
                 data['cmd'] = 'validate'
                 data['type'] = 'dns'
@@ -356,6 +358,9 @@ s.serve_forever()" """
 
     def _is_text_mode(self):
         return self.conf("text-mode")
+
+    def _is_json_mode(self):
+        return not self._is_text_mode()
 
     def _json_out(self, data, new_line=False):
         # pylint: disable=no-self-use
