@@ -21,6 +21,7 @@ import zope.interface
 
 from acme import challenges
 from acme import errors as acme_errors
+from acme.jose import b64
 
 from certbot import errors
 from certbot import interfaces
@@ -46,6 +47,8 @@ class AuthenticatorOut(common.Plugin):
     to use Python's built-in HTTP server.
 
     .. todo:: Support for `~.challenges.TLSSNI01`.
+
+    Script is also based on https://github.com/marcan/certbot-external
 
     """
     hidden = False
@@ -243,6 +246,43 @@ s.serve_forever()" """
     def cleanup(self, achalls):
         # pylint: disable=missing-docstring
         for achall in achalls:
+            if self._is_json_mode():
+                cur_record = OrderedDict()
+                cur_record['cmd'] = 'cleanup'
+                cur_record['type'] = None
+                if isinstance(achall.chall, challenges.HTTP01):
+                    cur_record['type'] = 'http'
+                elif isinstance(achall.chall, challenges.DNS01):
+                    cur_record['type'] = 'dns'
+                elif isinstance(achall.chall, challenges.TLSSNI01):
+                    cur_record['type'] = 'tlssni'
+
+                cur_record['status'] = None
+                cur_record['token'] = b64.b64encode(achall.chall.token)
+                cur_record['domain'] = achall.domain
+                cur_record['validated'] = None
+                cur_record['error'] = None
+
+                if achall.status is not None:
+                    try:
+                        cur_record['status'] = achall.status.name
+                    except:
+                        pass
+
+                if achall.error is not None:
+                    try:
+                        cur_record['error'] = str(achall.error)
+                    except:
+                        cur_record['error'] = 'ERROR'
+
+                if achall.validated is not None:
+                    try:
+                        cur_record['validated'] = str(achall.validated)
+                    except:
+                        cur_record['validated'] = 'ERROR'
+
+                self._json_out(cur_record, True)
+
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
 
@@ -320,7 +360,7 @@ s.serve_forever()" """
                         validation=validation,
                         domain=achall.validation_domain_name(achall.domain),
                         response=response))
-                
+
             elif self._is_json_mode():
                 data = OrderedDict()
                 data['cmd'] = 'validate'
