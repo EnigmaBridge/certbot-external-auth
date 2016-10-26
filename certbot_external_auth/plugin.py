@@ -143,6 +143,8 @@ s.serve_forever()" """
             help="Automatically allows public IP logging.")
         add("text-mode", action="store_true",
             help="Original text mode, by default turned off, produces JSON challenges")
+        add("handler", default=None,
+            help="Handler program that takes the action. Data is transferred in ENV vars")
 
     def prepare(self):  # pylint: disable=missing-docstring,no-self-use
         # Re-register reporter
@@ -179,8 +181,16 @@ s.serve_forever()" """
         responses = []
         # TODO: group achalls by the same socket.gethostbyname(_ex)
         # and prompt only once per server (one "echo -n" per domain)
+
+        if self._is_handler_mode() and self._call_handler("pre-perform") is None:
+            raise errors.PluginError("pre-perform handler failed")
+
         for achall in achalls:
             responses.append(mapping[achall.typ](achall))
+
+        if self._is_handler_mode() and self._call_handler("post-perform") is None:
+            raise errors.PluginError("post-perform handler failed")
+
         return responses
 
     def add_message(self, msg, priority, on_crash=True):
@@ -261,14 +271,26 @@ s.serve_forever()" """
 
     def cleanup(self, achalls):
         # pylint: disable=missing-docstring
+
+        if self._is_handler_mode() and self._call_handler("pre-cleanup") is None:
+            raise errors.PluginError("pre-cleanup handler failed")
+
         for achall in achalls:
             cur_record = self._get_cleanup_json(achall)
 
             if self._is_json_mode():
                 self._json_out(cur_record, True)
 
+            if self._is_handler_mode():
+                self._json_out(cur_record, True)
+                if self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
+                    raise errors.PluginError("cleanup handler failed")
+
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
+
+        if self._is_handler_mode() and self._call_handler("post-cleanup") is None:
+            raise errors.PluginError("post-cleanup handler failed")
 
     def _get_cleanup_json(self, achall):
         cur_record = OrderedDict()
@@ -307,6 +329,27 @@ s.serve_forever()" """
                 cur_record['validated'] = 'ERROR'
 
         return cur_record
+
+    def _get_json_to_kwargs(self, json_data):
+        """
+        Augments json data before passing to the handler script.
+        Prefixes all keys with cbot_ value to avoid clashes + serializes
+        itself to JSON - for JSON parsing stuff.
+
+        :param json_data:
+        :return:
+        """
+        n_data = OrderedDict()
+        for k in json_data:
+            val = json_data[k]
+            if k == 'command':
+                continue
+            if val is not None:
+                n_data[k] = val
+                n_data['cbot_' + k] = json_data[k]
+
+        n_data['cbot_json'] = json.dumps(json_data)
+        return n_data
 
     def _perform_http01_challenge(self, achall):
         # same path for each challenge response would be easier for
@@ -366,6 +409,11 @@ s.serve_forever()" """
             elif self._is_json_mode():
                 self._json_out_and_wait(json_data)
 
+            elif self._is_handler_mode():
+                self._json_out(json_data, True)
+                if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
+                    raise errors.PluginError("pre-perform handler failed")
+
             else:
                 raise errors.PluginError("Unknown mode selected")
 
@@ -396,6 +444,11 @@ s.serve_forever()" """
 
             elif self._is_json_mode():
                 self._json_out_and_wait(json_data)
+
+            elif self._is_handler_mode():
+                self._json_out(json_data, True)
+                if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
+                    raise errors.PluginError("pre-perform handler failed")
 
             else:
                 raise errors.PluginError("Unknown mode selected")
@@ -452,6 +505,11 @@ s.serve_forever()" """
         elif self._is_json_mode():
             self._json_out_and_wait(json_data)
 
+        elif self._is_handler_mode():
+            self._json_out(json_data, True)
+            if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
+                raise errors.PluginError("pre-perform handler failed")
+
         else:
             raise errors.PluginError("Unknown mode selected")
 
@@ -481,11 +539,46 @@ s.serve_forever()" """
                              "with %s code", self._httpd.returncode)
             shutil.rmtree(self._root)
 
+    def _call_handler(self, command, *args, **kwargs):
+        """
+        Invoking the handler script
+        :param command:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        env = dict(os.environ)
+        env.update(kwargs)
+        proc = subprocess.Popen([self._get_handler(), command] + list(args),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env=env)
+        stdout, stderr = proc.communicate()
+
+        if proc.returncode != 0:
+            if stdout.strip() == "NotImplemented":
+                logger.warning("Handler script does not implement %s\n%s",
+                               command, stderr)
+                return NotImplemented
+            else:
+                logger.error("Handler script failed!\n%s\n%s", stdout, stderr)
+                return None
+        else:
+                logger.info("Handler output (%s):\n%s\n%s",
+                               command, stdout, stderr)
+        return stdout
+
     def _is_text_mode(self):
         return self.conf("text-mode")
 
     def _is_json_mode(self):
-        return not self._is_text_mode()
+        return not self._is_text_mode() and not self._is_handler_mode()
+
+    def _is_handler_mode(self):
+        return self.conf("handler") is not None
+
+    def _get_handler(self):
+        return self.conf("handler")
 
     def _json_out(self, data, new_line=False):
         # pylint: disable=no-self-use
