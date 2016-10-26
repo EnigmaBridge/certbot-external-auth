@@ -2,6 +2,7 @@
 
 # Note: keep stdout clean, as it may be used to pass data back in the future,
 # and it is used to signal NotImplemented.
+# Inspiration taken from: https://github.com/marcan/letsencrypt-external
 
 set -e
 cmd="$1"
