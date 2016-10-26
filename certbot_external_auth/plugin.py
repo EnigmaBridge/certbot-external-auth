@@ -209,6 +209,7 @@ s.serve_forever()" """
                 data['validation'] = validation
                 data['uri'] = achall.chall.uri(achall.domain)
                 data['command'] = command
+                data['key-auth'] = response.key_authorization
                 self._json_out_and_wait(data)
 
         if not response.simple_verify(
@@ -234,6 +235,7 @@ s.serve_forever()" """
                 data['type'] = 'dns'
                 data['validation'] = validation
                 data['domain'] = achall.validation_domain_name(achall.domain)
+                data['key-auth'] = response.key_authorization
                 self._json_out_and_wait(data)
 
         try:
