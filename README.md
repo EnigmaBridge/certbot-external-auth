@@ -16,7 +16,7 @@ To use, try something like this:
 
 ```
 certbot --agree-tos --agree-dev-preview \
-        -a certbot-external:external \
+        -a certbot-external-auth:out \
         -d example.com certonly
 ```
 

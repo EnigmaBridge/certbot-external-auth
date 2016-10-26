@@ -20,7 +20,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'certbot.plugins': [
-            'external = certbot_external_auth.plugin:Authenticator',
+            'out = certbot_external_auth.plugin:AuthenticatorOut',
         ],
     },
 )

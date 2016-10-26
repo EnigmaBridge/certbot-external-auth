@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @zope.interface.implementer(interfaces.IAuthenticator)
 @zope.interface.provider(interfaces.IPluginFactory)
-class Authenticator(common.Plugin):
+class AuthenticatorOut(common.Plugin):
     """Manual Authenticator.
 
     This plugin requires user's manual intervention in setting up a HTTP
@@ -89,7 +89,7 @@ s.serve_forever()" """
     """Command template."""
 
     def __init__(self, *args, **kwargs):
-        super(Authenticator, self).__init__(*args, **kwargs)
+        super(AuthenticatorOut, self).__init__(*args, **kwargs)
         self._root = (tempfile.mkdtemp() if self.conf("test-mode")
                       else "/tmp/certbot")
         self._httpd = None
