@@ -81,7 +81,7 @@ out an error. The error is indicated also by returning non-zero return code.
 
 The particular examples for verification methods and handler follows.
 
-### Example - DNS
+### DNS
 
 Run the certbot with the following command:
 
@@ -113,7 +113,7 @@ Stdout:
 
 After `{"cmd": "validate"}` message the client waits on `\n` on the standard input to continue with the validation.
 
-### Example - DNS installer
+### DNS installer
 
 Certbot is running with action `run` which causes also Installer plugin part to work.
 The installer is the same for all validation modes so it is demonstrated only once.
@@ -149,7 +149,7 @@ Stdout:
 ```
 
 
-### Example - HTTP
+### HTTP
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -177,7 +177,7 @@ Stdout:
 {"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
-### Example - TLS-SNI
+### TLS-SNI
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -211,7 +211,7 @@ The following section demonstrates usage of the plugin with [Dehydrated] DNS hoo
 
 Note the certbot is run with action `run` so deployment callbacks are called too.
 
-In this repository there is `dehydrated-example.sh` which is a hook stub used in this example.
+In this repository there is [dehydrated-example.sh] which is a hook stub used in this example.
 
 
 ```bash
@@ -222,8 +222,10 @@ certbot --staging \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "bristol3.pki.enigmabridge.com" \
         -d "bs3.pki.enigmabridge.com" \
-        --preferred-challenges tls-sni \
-        certonly 2>/dev/null
+        --preferred-challenges dns \
+        --certbot-external-auth:out-handler ./dehydrated-example.sh \
+        --certbot-external-auth:out-dehydrated-dns \
+        run 2>/dev/null
 ```
 
 Stdout:
@@ -334,7 +336,7 @@ certbot --staging \
         -d "bristol3.pki.enigmabridge.com" \
         -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges dns \
-        --certbot-external-auth:out-handler handler-example.sh \
+        --certbot-external-auth:out-handler ./handler-example.sh \
         certonly 2>/dev/null
 ```
 
@@ -454,7 +456,7 @@ certbot --staging \
         -d "bristol3.pki.enigmabridge.com" \
         -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges http \
-        --certbot-external-auth:out-handler handler-example.sh \
+        --certbot-external-auth:out-handler ./handler-example.sh \
         certonly 2>/dev/null
 ```
 
@@ -578,7 +580,7 @@ certbot --staging \
         -d "bristol3.pki.enigmabridge.com" \
         -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges tls-sni \
-        --certbot-external-auth:out-handler handler-example.sh \
+        --certbot-external-auth:out-handler ./handler-example.sh \
         certonly 2>/dev/null
 ```
 
@@ -715,4 +717,5 @@ Once ticket [2782] is resolved this won't be needed.
 [certbot-external]: https://github.com/marcan/certbot-external
 [2782]: https://github.com/certbot/certbot/issues/2782
 [handler-example.sh]: https://github.com/EnigmaBridge/certbot-external-auth/blob/master/handler-example.sh
+[dehydrated-example.sh]: https://github.com/EnigmaBridge/certbot-external-auth/blob/master/dehydrated-example.sh
 [Dehydrated]: https://github.com/lukas2511/dehydrated
