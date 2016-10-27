@@ -320,7 +320,7 @@ s.serve_forever()" """
         cur_record['status'] = None
         cur_record['domain'] = achall.domain
         cur_record['token'] = b64.b64encode(achall.chall.token)
-        cur_record['validation'] = validation
+        cur_record['validation'] = validation if isinstance(validation, types.StringTypes) else None
         cur_record['key_auth'] = response.key_authorization
         cur_record['validated'] = None
         cur_record['error'] = None
