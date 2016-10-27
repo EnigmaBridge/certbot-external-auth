@@ -91,8 +91,8 @@ certbot --staging \
         --expand --renew-by-default \
         --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
-        -d "stoke2.pki.enigmabridge.com" \
-        -d "st2.pki.enigmabridge.com" \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges dns \
         certonly 2>/dev/null
 ```
@@ -113,6 +113,42 @@ Stdout:
 
 After `{"cmd": "validate"}` message the client waits on `\n` on the standard input to continue with the validation.
 
+### Example - DNS installer
+
+Certbot is running with action `run` which causes also Installer plugin part to work.
+The installer is the same for all validation modes so it is demonstrated only once.
+
+```bash
+certbot --staging \
+        --text --agree-tos --email you@example.com \
+        --expand --renew-by-default \
+        --configurator certbot-external-auth:out \
+        --certbot-external-auth:out-public-ip-logging-ok \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
+        --preferred-challenges dns \
+        run 2>/dev/null
+```
+
+Stdout:
+
+```json
+{"cmd": "perform", "type": "dns-01", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "txt_domain": "_acme-challenge.bristol3.pki.enigmabridge.com", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+
+{"cmd": "perform", "type": "dns-01", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "txt_domain": "_acme-challenge.bs3.pki.enigmabridge.com", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "deploy_cert", "domain": "bristol3.pki.enigmabridge.com", "cert_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/cert.pem", "key_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/privkey.pem", "chain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/chain.pem", "fullchain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem", "timestamp": 1477582237, "cert_timestamp": 1477582245.9930167}
+{"cmd": "save", "title": null, "temporary": false}
+{"cmd": "deploy_cert", "domain": "bs3.pki.enigmabridge.com", "cert_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/cert.pem", "key_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/privkey.pem", "chain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/chain.pem", "fullchain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem", "timestamp": 1477582237, "cert_timestamp": 1477582245.9930167}
+{"cmd": "save", "title": null, "temporary": false}
+{"cmd": "save", "title": "Deployed ACME Certificate", "temporary": false}
+{"cmd": "restart"}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again with the \"certonly\" option. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
+```
+
+
 ### Example - HTTP
 
 Run the certbot with the following command (just `preferred-challenges` changed):
@@ -123,8 +159,8 @@ certbot --staging \
         --expand --renew-by-default \
         --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
-        -d "stoke2.pki.enigmabridge.com" \
-        -d "st2.pki.enigmabridge.com" \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges http \
         certonly 2>/dev/null
 ```
@@ -151,8 +187,8 @@ certbot --staging \
         --expand --renew-by-default \
         --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
-        -d "stoke2.pki.enigmabridge.com" \
-        -d "st2.pki.enigmabridge.com" \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges tls-sni \
         certonly 2>/dev/null
 ```
@@ -169,7 +205,123 @@ Stdout:
 {"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
-### Example - Handler, DNS
+## Example - Dehydrated
+
+The following section demonstrates usage of the plugin with [Dehydrated] DNS hooks.
+
+Note the certbot is run with action `run` so deployment callbacks are called too.
+
+In this repository there is `dehydrated-example.sh` which is a hook stub used in this example.
+
+
+```bash
+certbot --staging \
+        --text --agree-tos --email you@example.com \
+        --expand --renew-by-default \
+        --configurator certbot-external-auth:out \
+        --certbot-external-auth:out-public-ip-logging-ok \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
+        --preferred-challenges tls-sni \
+        certonly 2>/dev/null
+```
+
+Stdout:
+
+```json
+{"cmd": "perform", "type": "dns-01", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "txt_domain": "_acme-challenge.bristol3.pki.enigmabridge.com", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "dns-01", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "txt_domain": "_acme-challenge.bs3.pki.enigmabridge.com", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "deploy_cert", "domain": "bristol3.pki.enigmabridge.com", "cert_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/cert.pem", "key_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/privkey.pem", "chain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/chain.pem", "fullchain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem", "timestamp": 1477582423, "cert_timestamp": 1477582428.9469378}
+{"cmd": "save", "title": null, "temporary": false}
+{"cmd": "deploy_cert", "domain": "bs3.pki.enigmabridge.com", "cert_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/cert.pem", "key_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/privkey.pem", "chain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/chain.pem", "fullchain_path": "/etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem", "timestamp": 1477582423, "cert_timestamp": 1477582428.9469378}
+{"cmd": "save", "title": null, "temporary": false}
+{"cmd": "save", "title": "Deployed ACME Certificate", "temporary": false}
+{"cmd": "restart"}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again with the \"certonly\" option. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
+```
+
+Stderr:
+
+```
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Starting new HTTPS connection (1): acme-staging.api.letsencrypt.org
+Renewing an existing certificate
+Performing the following challenges:
+dns-01 challenge for bristol3.pki.enigmabridge.com
+dns-01 challenge for bs3.pki.enigmabridge.com
+Handler output (deploy_challenge):
+
+-----BEGIN DEPLOY_CHALLENGE-----
+add _acme-challenge.bristol3.pki.enigmabridge.com. 300 in TXT "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc"\n\n
+-----BEGIN DEPLOY_CHALLENGE-----
+
+Self-verify of challenge failed.
+Handler output (deploy_challenge):
+
+-----BEGIN DEPLOY_CHALLENGE-----
+add _acme-challenge.bs3.pki.enigmabridge.com. 300 in TXT "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y"\n\n
+-----BEGIN DEPLOY_CHALLENGE-----
+
+Self-verify of challenge failed.
+Waiting for verification...
+Cleaning up challenges
+Handler output (clean_challenge):
+
+-----BEGIN CLEAN_CHALLENGE-----
+delete _acme-challenge.. 300 in TXT "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc"
+
+-----END CLEAN_CHALLENGE-----
+
+Handler output (clean_challenge):
+
+-----BEGIN CLEAN_CHALLENGE-----
+delete _acme-challenge.. 300 in TXT "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y"
+
+-----END CLEAN_CHALLENGE-----
+
+Generating key (2048 bits): /etc/letsencrypt/keys/0246_key-certbot.pem
+Creating CSR: /etc/letsencrypt/csr/0246_csr-certbot.pem
+Handler output (deploy_cert):
+
+-----BEGIN DEPLOY_CERT-----
+domain: bristol3.pki.enigmabridge.com
+key_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/privkey.pem
+cert_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/cert.pem
+fullchain_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem
+chain_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/chain.pem
+timestamp: 1477582423
+-----END DEPLOY_CERT-----
+
+Handler output (deploy_cert):
+
+-----BEGIN DEPLOY_CERT-----
+domain: bs3.pki.enigmabridge.com
+key_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/privkey.pem
+cert_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/cert.pem
+fullchain_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem
+chain_file: /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/chain.pem
+timestamp: 1477582423
+-----END DEPLOY_CERT-----
+
+
+-------------------------------------------------------------------------------
+Your existing certificate has been successfully renewed, and the new certificate
+has been installed.
+
+The new certificate covers the following domains:
+https://bristol3.pki.enigmabridge.com and https://bs3.pki.enigmabridge.com
+
+You should test your configuration at:
+https://www.ssllabs.com/ssltest/analyze.html?d=bristol3.pki.enigmabridge.com
+https://www.ssllabs.com/ssltest/analyze.html?d=bs3.pki.enigmabridge.com
+-------------------------------------------------------------------------------
+```
+
+## Example - Handler
+
+### DNS
 
 In this repository there is a default [handler-example.sh] which can be used as a handler.
 
@@ -179,8 +331,8 @@ certbot --staging \
         --expand --renew-by-default \
         --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
-        -d "stoke2.pki.enigmabridge.com" \
-        -d "st2.pki.enigmabridge.com" \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges dns \
         --certbot-external-auth:out-handler handler-example.sh \
         certonly 2>/dev/null
@@ -189,11 +341,11 @@ certbot --staging \
 Stdout:
 
 ```json
-{"cmd": "validate", "type": "dns-01", "validation": "qRd8tEFi1SjSLmx6TLnIwCfzVpITStphK3vxfBowP9w", "domain": "_acme-challenge.stoke2.pki.enigmabridge.com", "key_auth": "jFLsUgJjqtEb6vUVO8w_lI1uUnrVqCegndwwFGP83hA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
-{"cmd": "validate", "type": "dns-01", "validation": "UfxAs6ZOlZKpg8Fr6lHiQ3JSckFQkMZf2SsDt85vf88", "domain": "_acme-challenge.st2.pki.enigmabridge.com", "key_auth": "Xy7oP1uDdEhDbEG2yeyDJK61iz9sJjO7x7BAoIxgftE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
-{"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "jFLsUgJjqtEb6vUVO8w_lI1uUnrVqCegndwwFGP83hA", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "Xy7oP1uDdEhDbEG2yeyDJK61iz9sJjO7x7BAoIxgftE", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   connection", "Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.stoke2.pki.enigmabridge.com", "", "Domain: st2.pki.enigmabridge.com", "Type:   connection", "Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.st2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address. Additionally, please check that your computer has a publicly routable IP address and that no firewalls are preventing the server from communicating with the client. If you're using the webroot plugin, you should also verify that you are serving files from the webroot path you provided."]}]}
+{"cmd": "perform", "type": "dns-01", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "txt_domain": "_acme-challenge.bristol3.pki.enigmabridge.com", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "dns-01", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "txt_domain": "_acme-challenge.bs3.pki.enigmabridge.com", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
 Stderr: 
@@ -201,10 +353,10 @@ Stderr:
 ```
 Saving debug log to /var/log/letsencrypt/letsencrypt.log
 Starting new HTTPS connection (1): acme-staging.api.letsencrypt.org
-Obtaining a new certificate
+Renewing an existing certificate
 Performing the following challenges:
-dns-01 challenge for stoke2.pki.enigmabridge.com
-dns-01 challenge for st2.pki.enigmabridge.com
+dns-01 challenge for bristol3.pki.enigmabridge.com
+dns-01 challenge for bs3.pki.enigmabridge.com
 Handler output (pre-perform):
 
 -----BEGIN PRE-PERFORM-----
@@ -215,15 +367,15 @@ Handler output (perform):
 -----BEGIN PERFORM-----
 cmd: perform
 type: dns-01
-domain: _acme-challenge.stoke2.pki.enigmabridge.com
+domain: bristol3.pki.enigmabridge.com
 uri: 
-validation: qRd8tEFi1SjSLmx6TLnIwCfzVpITStphK3vxfBowP9w
-key-auth: jFLsUgJjqtEb6vUVO8w_lI1uUnrVqCegndwwFGP83hA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+validation: 667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc
+key-auth: _QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
 z_domain: 
 cert_path: 
 key_path: 
 port: 
-json: {"cmd": "validate", "type": "dns-01", "validation": "qRd8tEFi1SjSLmx6TLnIwCfzVpITStphK3vxfBowP9w", "domain": "_acme-challenge.stoke2.pki.enigmabridge.com", "key_auth": "jFLsUgJjqtEb6vUVO8w_lI1uUnrVqCegndwwFGP83hA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+json: {"cmd": "perform", "type": "dns-01", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "txt_domain": "_acme-challenge.bristol3.pki.enigmabridge.com", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 -----END PERFORM-----
 
 Self-verify of challenge failed.
@@ -232,15 +384,15 @@ Handler output (perform):
 -----BEGIN PERFORM-----
 cmd: perform
 type: dns-01
-domain: _acme-challenge.st2.pki.enigmabridge.com
+domain: bs3.pki.enigmabridge.com
 uri: 
-validation: UfxAs6ZOlZKpg8Fr6lHiQ3JSckFQkMZf2SsDt85vf88
-key-auth: Xy7oP1uDdEhDbEG2yeyDJK61iz9sJjO7x7BAoIxgftE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+validation: ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y
+key-auth: 3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
 z_domain: 
 cert_path: 
 key_path: 
 port: 
-json: {"cmd": "validate", "type": "dns-01", "validation": "UfxAs6ZOlZKpg8Fr6lHiQ3JSckFQkMZf2SsDt85vf88", "domain": "_acme-challenge.st2.pki.enigmabridge.com", "key_auth": "Xy7oP1uDdEhDbEG2yeyDJK61iz9sJjO7x7BAoIxgftE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+json: {"cmd": "perform", "type": "dns-01", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "txt_domain": "_acme-challenge.bs3.pki.enigmabridge.com", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 -----END PERFORM-----
 
 Self-verify of challenge failed.
@@ -261,11 +413,11 @@ Handler output (cleanup):
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: dns-01
-domain: stoke2.pki.enigmabridge.com
+domain: bristol3.pki.enigmabridge.com
 status: pending
-token: jFLsUgJjqtEb6vUVO8w_lI1uUnrVqCegndwwFGP83hA
-error: 
-json: {"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "jFLsUgJjqtEb6vUVO8w_lI1uUnrVqCegndwwFGP83hA", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
+token: _QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU
+error: None
+json: {"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
 -----END CLEANUP-----
 
 Handler output (cleanup):
@@ -273,11 +425,11 @@ Handler output (cleanup):
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: dns-01
-domain: st2.pki.enigmabridge.com
+domain: bs3.pki.enigmabridge.com
 status: pending
-token: Xy7oP1uDdEhDbEG2yeyDJK61iz9sJjO7x7BAoIxgftE
-error: 
-json: {"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "Xy7oP1uDdEhDbEG2yeyDJK61iz9sJjO7x7BAoIxgftE", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
+token: 3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4
+error: None
+json: {"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
 -----END CLEANUP-----
 
 Handler output (post-cleanup):
@@ -285,10 +437,11 @@ Handler output (post-cleanup):
 -----BEGIN POST-CLEANUP-----
 -----END POST-CLEANUP-----
 
-Failed authorization procedure. stoke2.pki.enigmabridge.com (dns-01): urn:acme:error:connection :: The server could not connect to the client to verify the domain :: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.stoke2.pki.enigmabridge.com, st2.pki.enigmabridge.com (dns-01): urn:acme:error:connection :: The server could not connect to the client to verify the domain :: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.st2.pki.enigmabridge.com
+Generating key (2048 bits): /etc/letsencrypt/keys/0240_key-certbot.pem
+Creating CSR: /etc/letsencrypt/csr/0240_csr-certbot.pem
 ```
 
-### Example - Handler, HTTP
+### HTTP
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -298,8 +451,8 @@ certbot --staging \
         --expand --renew-by-default \
         --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
-        -d "stoke2.pki.enigmabridge.com" \
-        -d "st2.pki.enigmabridge.com" \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges http \
         --certbot-external-auth:out-handler handler-example.sh \
         certonly 2>/dev/null
@@ -308,11 +461,11 @@ certbot --staging \
 Stdout:
 
 ```json
-{"cmd": "validate", "type": "http-01", "validation": "8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" 8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
-{"cmd": "validate", "type": "http-01", "validation": "8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://st2.pki.enigmabridge.com/.well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" 8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
-{"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
+{"cmd": "perform", "type": "http-01", "domain": "bristol3.pki.enigmabridge.com", "token": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "validation": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://bristol3.pki.enigmabridge.com/.well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "http-01", "domain": "bs3.pki.enigmabridge.com", "token": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "validation": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://bs3.pki.enigmabridge.com/.well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "cleanup", "type": "http-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "validation": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "key_auth": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "http-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "validation": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "key_auth": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
 Stderr: 
@@ -320,10 +473,10 @@ Stderr:
 ```
 Saving debug log to /var/log/letsencrypt/letsencrypt.log
 Starting new HTTPS connection (1): acme-staging.api.letsencrypt.org
-Obtaining a new certificate
+Renewing an existing certificate
 Performing the following challenges:
-http-01 challenge for stoke2.pki.enigmabridge.com
-http-01 challenge for st2.pki.enigmabridge.com
+http-01 challenge for bristol3.pki.enigmabridge.com
+http-01 challenge for bs3.pki.enigmabridge.com
 Handler output (pre-perform):
 
 -----BEGIN PRE-PERFORM-----
@@ -334,38 +487,38 @@ Handler output (perform):
 -----BEGIN PERFORM-----
 cmd: perform
 type: http-01
-domain: 
-uri: http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4
-validation: 8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
-key-auth: 8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+domain: bristol3.pki.enigmabridge.com
+uri: http://bristol3.pki.enigmabridge.com/.well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY
+validation: oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+key-auth: oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
 z_domain: 
 cert_path: 
 key_path: 
 port: 
-json: {"cmd": "validate", "type": "http-01", "validation": "8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" 8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+json: {"cmd": "perform", "type": "http-01", "domain": "bristol3.pki.enigmabridge.com", "token": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "validation": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://bristol3.pki.enigmabridge.com/.well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 -----END PERFORM-----
 
-Starting new HTTP connection (1): stoke2.pki.enigmabridge.com
-Unable to reach http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4: HTTPConnectionPool(host='stoke2.pki.enigmabridge.com', port=80): Max retries exceeded with url: /.well-known/acme-challenge/8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x7faa538ca550>: Failed to establish a new connection: [Errno 111] Connection refused',))
+Starting new HTTP connection (1): bristol3.pki.enigmabridge.com
+Unable to reach http://bristol3.pki.enigmabridge.com/.well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY: HTTPConnectionPool(host='bristol3.pki.enigmabridge.com', port=80): Max retries exceeded with url: /.well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x7ff5bc837d90>: Failed to establish a new connection: [Errno 111] Connection refused',))
 Self-verify of challenge failed.
 Handler output (perform):
 
 -----BEGIN PERFORM-----
 cmd: perform
 type: http-01
-domain: 
-uri: http://st2.pki.enigmabridge.com/.well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw
-validation: 8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
-key-auth: 8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+domain: bs3.pki.enigmabridge.com
+uri: http://bs3.pki.enigmabridge.com/.well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0
+validation: L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+key-auth: L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
 z_domain: 
 cert_path: 
 key_path: 
 port: 
-json: {"cmd": "validate", "type": "http-01", "validation": "8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://st2.pki.enigmabridge.com/.well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" 8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+json: {"cmd": "perform", "type": "http-01", "domain": "bs3.pki.enigmabridge.com", "token": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "validation": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://bs3.pki.enigmabridge.com/.well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 -----END PERFORM-----
 
-Starting new HTTP connection (1): st2.pki.enigmabridge.com
-Unable to reach http://st2.pki.enigmabridge.com/.well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw: HTTPConnectionPool(host='st2.pki.enigmabridge.com', port=80): Max retries exceeded with url: /.well-known/acme-challenge/8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x7faa538ca690>: Failed to establish a new connection: [Errno 111] Connection refused',))
+Starting new HTTP connection (1): bs3.pki.enigmabridge.com
+Unable to reach http://bs3.pki.enigmabridge.com/.well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0: HTTPConnectionPool(host='bs3.pki.enigmabridge.com', port=80): Max retries exceeded with url: /.well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x7ff5bc837f10>: Failed to establish a new connection: [Errno 111] Connection refused',))
 Self-verify of challenge failed.
 Handler output (post-perform):
 
@@ -384,11 +537,11 @@ Handler output (cleanup):
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: http-01
-domain: stoke2.pki.enigmabridge.com
+domain: bristol3.pki.enigmabridge.com
 status: pending
-token: 8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4
-error: 
-json: {"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "8UHf1Qzw1FoR6OdpySMAV8oNsE5vVRR-6W3xw6dRSn4", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
+token: oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY
+error: None
+json: {"cmd": "cleanup", "type": "http-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "validation": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "key_auth": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
 -----END CLEANUP-----
 
 Handler output (cleanup):
@@ -396,11 +549,11 @@ Handler output (cleanup):
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: http-01
-domain: st2.pki.enigmabridge.com
+domain: bs3.pki.enigmabridge.com
 status: pending
-token: 8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw
-error: 
-json: {"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "8ll4_J0LMiomoRtpqpneiPQHYwbxXg1XG5rS0JBXnLw", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
+token: L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0
+error: None
+json: {"cmd": "cleanup", "type": "http-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "validation": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "key_auth": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
 -----END CLEANUP-----
 
 Handler output (post-cleanup):
@@ -408,10 +561,11 @@ Handler output (post-cleanup):
 -----BEGIN POST-CLEANUP-----
 -----END POST-CLEANUP-----
 
-Failed authorization procedure. st2.pki.enigmabridge.com (http-01): urn:acme:error:unknownHost :: The server could not resolve a domain name :: No valid IP addresses found for st2.pki.enigmabridge.com, stoke2.pki.enigmabridge.com (http-01): urn:acme:error:unknownHost :: The server could not resolve a domain name :: No valid IP addresses found for stoke2.pki.enigmabridge.com
+Generating key (2048 bits): /etc/letsencrypt/keys/0242_key-certbot.pem
+Creating CSR: /etc/letsencrypt/csr/0242_csr-certbot.pem
 ```
 
-### Example - Handler, TLS-SNI
+### TLS-SNI
 
 Run the certbot with the following command (just `preferred-challenges` changed):
 
@@ -421,8 +575,8 @@ certbot --staging \
         --expand --renew-by-default \
         --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
-        -d "stoke2.pki.enigmabridge.com" \
-        -d "st2.pki.enigmabridge.com" \
+        -d "bristol3.pki.enigmabridge.com" \
+        -d "bs3.pki.enigmabridge.com" \
         --preferred-challenges tls-sni \
         --certbot-external-auth:out-handler handler-example.sh \
         certonly 2>/dev/null
@@ -431,11 +585,11 @@ certbot --staging \
 Stdout:
 
 ```json
-{"cmd": "validate", "type": "tls-sni-01", "domain": "stoke2.pki.enigmabridge.com", "z_domain": "5622ec18934aae89a99151c76c564e76.806248d277161f80d69ed6514efb083a.acme.invalid", "cert_path": "/var/lib/letsencrypt/HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.crt", "key_path": "/var/lib/letsencrypt/HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.pem", "port": "443", "key_auth": "HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQC6afBA93Xzb+UgPfmf6c9DANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjYyMzQ3MzRaFw0xNjExMDIyMzQ3MzRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAuKjflYNA3YUWfheBOWw0JNOlTcM4Wt5iHobLo6/x9T1fPMDL/pVAwLPQkOnn\niRo/tlwMU6Gv14NTw1S7YRHuGmHCKx8P6PqYrkJTFmcp8PQfVIW5QmYbWPX2GQNw\n36I4ljSeYWI5v+GuRwkg5r7Ya/Xcnt2lHqoD6smL7mChw/cMNulHnzp5GeA9QUhf\nm819nGCBaUYw/Dxg93bIeiCZEsyXiu1N2ARpJNnf2WqrUXsQhhcTRKkiIhkD8kJX\nL9wB+RaT/Ik+le6HGhrbqHWFT2hu2WqvdrGtTBi0jNLQpVcm389aUqE0vgpNSHLr\naIkHM+yuHErxoMM5JDFZb5drHQIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk41NjIyZWMxODkzNGFhZTg5YTk5MTUxYzc2YzU2\nNGU3Ni44MDYyNDhkMjc3MTYxZjgwZDY5ZWQ2NTE0ZWZiMDgzYS5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBALBJs1n0gthJyjQ4BOsy20y0vZSrtoPMAZLo\n9tAnxbfTyhIXLW4B+ZkF2h/+QjBksEZRQUsNEizhZ7s0+AQHGr+PAOwRI1XkUx43\nrdMg7pXBU5ViyE2qYbx8ZRC9XkCYmiZB6R9FWprD/gTsudgUMhteqguvOOfe9cm4\nHuM361+Y/96awwz1cYP9zMT2mUQEVRlM3/RtcxwQGAJLHuTH0lDZ521YuhlERuwu\nrW9w9FZzoDgCXwsrusmjf7/N5aUMXcZUIOC9vPqS3xL3EPn/cZQbOjjtARPioQgu\nu8lNcgYoPnS9VO/esgKMqV6+fB92fcOAFuONaCzzlmlLt1qZVBk=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC4qN+Vg0DdhRZ+\nF4E5bDQk06VNwzha3mIehsujr/H1PV88wMv+lUDAs9CQ6eeJGj+2XAxToa/Xg1PD\nVLthEe4aYcIrHw/o+piuQlMWZynw9B9UhblCZhtY9fYZA3DfojiWNJ5hYjm/4a5H\nCSDmvthr9dye3aUeqgPqyYvuYKHD9ww26UefOnkZ4D1BSF+bzX2cYIFpRjD8PGD3\ndsh6IJkSzJeK7U3YBGkk2d/ZaqtRexCGFxNEqSIiGQPyQlcv3AH5FpP8iT6V7oca\nGtuodYVPaG7Zaq92sa1MGLSM0tClVybfz1pSoTS+Ck1IcutoiQcz7K4cSvGgwzkk\nMVlvl2sdAgMBAAECggEALjzKz0swQMeEXEpSZyh63gXIzHHneIlalD44W2JA+aFG\naZX0/mgs8JOV09Nd0GysK2NdCsvfld0iajSbPrEYp652yglbGIE3HdsppuBqFhVq\niuV4//FFQ79CwfyklLqv5JyEU+oef7doxgy5Gk4LLu0/MuBY6ha0KGQTD7tOhhy3\nG9sUTPJ0+z5vbLfJGTLCEFivBFWcfKz0AcnIxrgbHYMMgHVyqkufqBv3VOcqbP6B\nYL1MyAtT0/IM6uT2NFFit+FGZFscLFIVgd036NbylugzapMt1oMwB6YaBHscOwL8\nabEGz67exjsgnwbkbnczlgAoObQAmkJxrE5WDWSLAQKBgQDfV641bJXjcevDUDWT\nxTtP/KmQ6HZ1T6xixxh5U9L3tRZFSwfwflzlVsaiBbt1POGuna01JmK/By3vlgM9\nQrE6L4hQSfudBmwToXN9wNi1Q53tzciLIzV2/hV5g7pPztPnSXh5i8ILCZrZdj2v\nq82azMGDjCnbTXarRCatf0s6fQKBgQDTqTBF9YJj1WRZ0YLHFJGQ0v8dul3WqHPm\n3uBAGmbvv2X61WDWsWK38fYr34BrxiWHfCshhYQClQn0XXcWyVL7T4/Z9vvSrdUa\nlPj1qbqGQlktylpH3ke5dWK1lPsp6Va7+Rj/52M6OVHcbxdyAUEN6L+NYIuB3o/K\n1Edp1D01IQKBgHDyj5hW9KpUd22Lx7yWVvuJhFtTJG0JQN2nYDojaSJ6QuwCGN7H\nmMUmkEdp7LZKdrtu5CRn6DJBODrcu4CklKofVal88LEliUyYLqbe+vkYW+riUdQD\nl0s5DbUpJ/SqXUGvRyz4v8YDMntdL68CjHUHramQHa7ZSvUr/v9oy6ulAoGATLkr\ncnCID0Au3BAB48Ak8+ZH67K+iS0OtkVb7GClp4otoTrvm2M5cYwXu9eMaYSt3eq4\nh7IqI/V6YkXvASeBGO/CKTRKHBg/Ax+1DvezUS+DvAF5sEt2nFdcrI2QbaTTd9fX\npAtwAI7+iXULfpvNxQj1Rn4Uk8LlRJSmPkpc1YECgYB1pLvi6PXGKQrD4WrZNDLV\nTbJhgZXqnOfBMLlU4bBXHMNcxyHMcc2a8D5k1sQMbkmz+ACKprCrwCbChTNoO3d7\n4V13uhfZx58SwzxpPegLzlzJGpAnIN0top6jGbMYA+Y9xdQT/szd06psH2qF8ryq\nGvxKjvrib2Ozb8FyOmQPhw==\n-----END PRIVATE KEY-----\n"}
-{"cmd": "validate", "type": "tls-sni-01", "domain": "st2.pki.enigmabridge.com", "z_domain": "61f21f3436004bf6d3943238bddf4bea.fef2bfabc3c2895f5aace483a5986b02.acme.invalid", "cert_path": "/var/lib/letsencrypt/D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.crt", "key_path": "/var/lib/letsencrypt/D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.pem", "port": "443", "key_auth": "D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQBKl0xmWnQyv+BiIrTTUIODANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjYyMzQ3MzRaFw0xNjExMDIyMzQ3MzRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEA1JBtAfRosRsTa91q5uuIX2hXcjFLyfoYnLxRtUymAzBdn4JkSJ9Wh9tEobnt\n9bmNnmmFPAxOOK7gBECqyTwd6s1549PcEDaYrsAsLcchpwAFX7Iu4AwIOzEP70k7\nBIefgJPlhRxfTycalkiV0Bg2qYLCEU0HXOnsXx0vQFVMZaeeDhZI16qcb+xDamBc\nTz3d2J4hiFmbxQKKdK+HZKtc+VdbXSW18u7sCwO11eHBcexyflF6CLgEB2sUUQ7e\n8WOJ7JxrcuUIp5qJneyasGDaKsnqr3izKhLwfr4ni3oyZ2uYPJA7/85c102+d/aF\nesJyQAOAUa/bwNFf1cvh2024JwIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk42MWYyMWYzNDM2MDA0YmY2ZDM5NDMyMzhiZGRm\nNGJlYS5mZWYyYmZhYmMzYzI4OTVmNWFhY2U0ODNhNTk4NmIwMi5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBAEy0Bqah+nFcUc3OtJ5KYEBw9vBRKrSCPX+J\n/vWHgKAQ4h8VzkrAjAZBRfLddzBwuJbyxkjteef+7sAbdjdp5PAWfu5u6nCxFJTc\nBSSZQ+kyj3kjoB5eQrY3Eq99e6LirqECKxKl1jE4eb5FyU7ItEFXOAiKwvAq5FnB\nMLCm3WgG3N72/SIvSf2upBMCMkHtnZmSQhr/XbbQcBk0oWhmgUkRnee+4/wAuxqf\nZ2SBcM+gAlbgEjWF07sjRDg2PGFjD5Xk3JX+EKz6wJ7eTFjBdhicyCxtxmFtLxgL\n+ljW8a8UzQ+9CJFxRtKDg+0esN3p9nc/G5kXqMM5kNaAqLp6BjA=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDUkG0B9GixGxNr\n3Wrm64hfaFdyMUvJ+hicvFG1TKYDMF2fgmRIn1aH20Shue31uY2eaYU8DE44ruAE\nQKrJPB3qzXnj09wQNpiuwCwtxyGnAAVfsi7gDAg7MQ/vSTsEh5+Ak+WFHF9PJxqW\nSJXQGDapgsIRTQdc6exfHS9AVUxlp54OFkjXqpxv7ENqYFxPPd3YniGIWZvFAop0\nr4dkq1z5V1tdJbXy7uwLA7XV4cFx7HJ+UXoIuAQHaxRRDt7xY4nsnGty5Qinmomd\n7JqwYNoqyeqveLMqEvB+vieLejJna5g8kDv/zlzXTb539oV6wnJAA4BRr9vA0V/V\ny+HbTbgnAgMBAAECggEBAI0L9LlKU7nJbJ6zgr8N5STh2Ly2R0MTyAcg0tsJrFML\nYeR5IlAqIsHtVmI2PNdDs9w8yqLoy3LDX3SS8ICtenCWvd3Wc/zyLWgvrmEF9Kea\n1PYGByK1+TRFvvwZzKaZ09X+zVsBU6DzIqo8KeS2XHcog9v1EACwXB9U/0iiERqV\n4zKcMM7R2A18Hbbh87lFcPZxg5UWo5hywKZTA7PVi5kEUzUcggPKv42vXH4xn0z2\nTLPbGDFxB8/lKM+19bv0JzgosMhT5bhla8WUsAv+K1wZmdIgpsNZ+cZHFgRc/VNj\nRBjoqKPScIMG0z1RbENKug1RIGqlu0TcpfLpYuJ3atkCgYEA/KkbmXiR79JbqOYn\nOxFbIY/aorqwlEtQkaSGswtblQqi/m1aHmFLbvh9YIw/iPP8bSQ4AZmUHmh2HLFf\nfhNcPOLoyoCu6nSAlLZ2f2wphh++xF2KxSE/M19v3HAIrw8yNrDRiqk7qshGTBrh\nmmH685HhdP6E95Eu6GiyvtEnnGUCgYEA11+mPflBqjk3mYEETcq3DExsJYa3iULy\nHTX61222wavjvqS9c4EmqxlNDCiIC4Ninx1cSpokYNCVO1Epg/QHOS+K6/SykKM6\nDPOn+FSA8NxHZtdVa7NJjQaHb1sG4Y+XkTde3qnxEKy9peVdDtBUjX8/08Q0kFqz\n/J40PC7f+5sCgYEAs+iOmId8EzLMxcWspajEJW/TlRAucEn4wtxOdeteeRAr49Nl\n2kAZgJk8XaVAEHr7gZPKtYjwKX7kq6W5g4KxqUFB1gAvjQ8MB9itJCqWnsS4CAc7\nqwbzg9cvRd4YsN63OK5LZtr+e6tEMyjpAA9IrGtyCOa7M7WTmzYCIVG5TOkCgYBl\n0oq98gHhgHuQzzZBsP0pi1f1xeMvub7NoJ+fCffFSIa7sxb+bKjja2rJvL/U8aDG\nqRLhEk7wlqx3BsAh6lUf7CI5u85QI1tmlCttdEYhmYMIU/XGnVTAn72YH+j46vI1\nbYAktSOLRp/CttVwE35mBysd6z0OolNFs2Xurhqm0QKBgQCzzI3yaTfahBV61cyQ\nAyXCDRqJeYNOwORnyfo5uHFdyqpbxCiHl8AWq072GB58wMUl6Xgl8cg0qENcRJmu\n53Ar3FDMgwe2azqpkX0kYqegG3DU3fMc2ICg+75kHp9phdP0SjtUNxDoU8aL3f1X\nGobGNYJ8QPFBqqb2J7+fmXCInw==\n-----END PRIVATE KEY-----\n"}
-{"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
+{"cmd": "perform", "type": "tls-sni-01", "domain": "bristol3.pki.enigmabridge.com", "token": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA", "z_domain": "9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid", "validation": "9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid", "cert_path": "/var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.crt", "key_path": "/var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.pem", "port": "443", "key_auth": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQL7xAiyGGk2XO7z+MAyWxUTANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjcxNTI3MjRaFw0xNjExMDMxNTI3MjRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAn9lru0+nkHAhKoOe6VCd+tBEThcjMb+bYiY5LpMDA1SJdOw7/h+xo6mdQdTi\naUV+CCJvyo5EZeHs8hsIYgT8wzla9QACwptbPIPN4ieD7EEhjzw/fTF6JBsoewBU\nJQqP9Z7K67EquTj9B0DddUc6/R7eLWP2THcNf5DXa/+F7Mkl1RWZCaXwNheymNJ9\nlk5qqQnW5GoXHtnb1U0XH4dIDbCG/kBZ1w9NwVktbOT3wNcPTp9Afly05jn9pOb2\n5pAyntspnImd7IpDlYG/eYo3SS+OeD1XO8C/Qtx9BYE/BQtNdfSnGpGL70zT4rQz\nhvY6UJosfSdRrKaEwg3AkRAB1wIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk45ZTE4NDI5OTI1NTY0ODMyYjRhY2VhNTM2YWVi\nMzBlOC5jMDZmNDYzOGE5NzNkMjc1NmFiM2ZmMTdiOGVkNjhiOC5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBAD/bhdmAB9r2diWE5/P9yoBBv2TkVzPmF3W5\nA7DPVICERcvCXWqSUM5Evl66YFNkFeGY9NnT7/1EhwaCyfQqs0KRo1WoE6cQZn5i\nF/d5Zw97MDKF6ny1edZgC5mCvTvVgDOFrdsYAL3BH5KXzDhljPnPJ4bKkq6cPY2M\netO+2x+LYqxZpgwLXbEcIJGddFIPHIGa6rMHcwqq4qbR7rK2QZg0RlVicU1cg5Nz\nYPYso6knGlauWj0wh3siuAZxWj3ulwiSpkOH9Nc/O3sM1QZW/KUsauB9zwbqcfmp\nqOFUAR5LW6M9AoA8Jpsb/ELWz64BNQ0c/UoF5iwg6+lgkg9cntU=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCf2Wu7T6eQcCEq\ng57pUJ360EROFyMxv5tiJjkukwMDVIl07Dv+H7GjqZ1B1OJpRX4IIm/KjkRl4ezy\nGwhiBPzDOVr1AALCm1s8g83iJ4PsQSGPPD99MXokGyh7AFQlCo/1nsrrsSq5OP0H\nQN11Rzr9Ht4tY/ZMdw1/kNdr/4XsySXVFZkJpfA2F7KY0n2WTmqpCdbkahce2dvV\nTRcfh0gNsIb+QFnXD03BWS1s5PfA1w9On0B+XLTmOf2k5vbmkDKe2ymciZ3sikOV\ngb95ijdJL454PVc7wL9C3H0FgT8FC0119KcakYvvTNPitDOG9jpQmix9J1GspoTC\nDcCREAHXAgMBAAECggEBAJo8DEHwyqqINsgxtaxD2BsAx1dd5dyDl6btYLE6smaN\nNBA4PG6oIBvdddnmUgvnPIMWzyzvdrmjc5/rS3xgeY7ZEZViTEd/5VmPh6EWJalY\n8sulA1GF4udhuP5tw8L13Q/PBtbB3IpZnXNZOBWIBDflh9TeJfGD0edrVyBirdNY\nf64Xm7DI59tqEv8aG1c9CbmmreP7XQqbK7zbXEg/PP+JfedBdccKPrlcDnzSoA78\n+XoNHPI0GyJ2JhSzApfulJyloa1MGd20XUyJgDTT66zaiCI/UoTUvAUolBDdZqJw\nRiGYFPb5yDI3SnW98WUurLE+VpE15fKNoZlGl6ToQSkCgYEA1FQrWPSzIltDJwui\ncQNWKQpT0Pin4rYb9TjrY5qwDJAoAjBjjvbKphBA63OO3O8xy7TlZn13CAV9Kok8\nI/LYLzANZTNYwfRy0h3aGQj/0qX0O6hdse742Yo6KGrpTGH1ur/Xb1x3H0poevEK\nB/hYYQV2IGv/wcWIKN+bygPsRl0CgYEAwLoHUIl1b1wqGzAN1Zl/jsiXCeGyhGGV\nWMFQkWFjCuYAAVd+gFOzKji6mEIAHg8oHDe3UkODYxkDXJJhxg/rT/qX/sTMeo65\nIcRihVe6PS/dKHA6gTMmQwuQHrKggAHsGFMz9qDHF3QuBXhYT6Xi72LLoYwt4IEj\nJLzc+Xr3fcMCgYBJ0PlA89FTIGc4K9NNdtt9aRm6jLfRGX6ewisTdbO+ql8+Y5Q5\nH5NUKFJpiMMiDAZDy5/1AalgIIhjQVKnLMX7obkGddNlmpZQdhBco8RMd2VxWBc6\nxNm+x09wvbpd07CaPBepn3vKZRPtqd7S5oPTNxLaMrG3q/SqQRLoKHT8AQKBgQC1\n6qLe5XFBFUj1cs2MMqDSAQt4m17rUEUtiwPmxns7nVCh85mHvfnfP77520rLFNly\nkTDsaKfLUZ/3sICz+PDQBKWWKOMuSCv98KZiYSV9fgGOmyjOLZ7PKEn4f/m5+paF\ne3wQL0DeJZ8PMMKDI/1qouG9clkXki2/DrqyjtywCwKBgHrwsxNOandciH8BZ0vr\nvuZnzs/6KIpywHM8u/qRI8P3l/2nQx/rbh9Bip+k3wK6MMmKbYCU2ZS322eldOqW\nmT6iwRkseQsm/sO7IbcO/6pvWDS23452346456345654365+adEEqD3m\nE2UjyPLbhfR9Ey8KBetqmgy9\n-----END PRIVATE KEY-----\n"}
+{"cmd": "perform", "type": "tls-sni-01", "domain": "bs3.pki.enigmabridge.com", "token": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE", "z_domain": "73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid", "validation": "73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid", "cert_path": "/var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.crt", "key_path": "/var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.pem", "port": "443", "key_auth": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQOBpsqM/b5w2xCpImjT8EeTANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjcxNTI3MjRaFw0xNjExMDMxNTI3MjRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAq0gNleuNFlA4bNVPPEOUp1HQhg0nHi75VPyzfPG8iDcOltW+iwrfMz7eRk1T\nYruXvQxisoH1hyv2ndEFH7hqc5IRX8kCt9lPNSmBYov+krLG8Sxy1uqTQ5y81YXy\nyr/oTSNGtIceyjW4oN+HtlIHOJjlFkvhSammmLP5S/GlR8Qo33bpAVXx1paNClJt\nH1bAYc3wZ6RNXVCFazbaE5yzN1WucsXrwFYkxyPA/sf76/OLsCaHGdSH2v2L5S+h\nPKRFQoI9AsbRU6uIiP7WsGTn1BnivXvtlLEw3VZMS3BuzPNn4Tam/h16fxViTb5c\nJQabxOOOX5m5t3rUOYLP2j08iwIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk43MzQ1M2UxOWRhNDk1YTdkNWZlMTVkNzM1NmJj\nNTc5OC42NDIyZjNmNWU1NTZhOGZjOTI2OTllZjliMmZlMTk3NC5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBABHFzi+TrNUsU4LswMJqJ5NqU3LjwdZxe974\n+eP3s4cOpoRwBh7PQKzlc4KiB1qv2MTqTjVNiGnFEw3bvs6oUHM610U0yOvuxdIy\nAZ6KfzOO2Hoj8V4v/c+uO2yqiCK33JTprYnie+fgodt3GDv0JcQuUznfBSRS4T2A\nbM3yEZSLKyQL3EmA8Y6DJov/Dh7B8sEepXv3lewO3NxhubhDzG90zYqYq0Ddn56D\nWnduSJ6wIxu/R0ccryBr4nO8ZENqC7h7//GNE7wtCyeNeHyJ/ePcD00MDWyiy80o\nk/GFatmNr8iT73UnN5qgt7LpVxzHHRxcIVPJWu2YDVaGH4oA28o=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCrSA2V640WUDhs\n1U88Q5SnUdCGDSceLvlU/LN88byINw6W1b6LCt8zPt5GTVNiu5e9DGKygfWHK/ad\n0QUfuGpzkhFfyQK32U81KYFii/6SssbxLHLW6pNDnLzVhfLKv+hNI0a0hx7KNbig\n34e2Ugc4mOUWS+FJqaaYs/lL8aVHxCjfdukBVfHWlo0KUm0fVsBhzfBnpE1dUIVr\nNtoTnLM3Va5yxevAViTHI8D+x/vr84uwJocZ1Ifa/YvlL6E8pEVCgj0CxtFTq4iI\n/tawZOfUGeK9e+2UsTDdVkxLcG7M82fhNqb+HXp/FWJNvlwlBpvE445fmbm3etQ5\ngs/aPTyLAgMBAAECggEATh97MtpRa9ADLIDOtyoL75U9iycMpJPAXac1JtQLrgWO\nvfWYB0taKsGOGHrEgdAWkb/IdKsaFiFTRwBDWgh/ZV9GVW4Vs02G9zSLMyuvXbH1\nU6N2bdhoevpOlwWVjCykBCsG4OiQfqKqJ5ZNDDe123bBZr4Nb8/VkOjl2GHLhUOP\nz4ootHaPxBjqmHxAJO+b7xeiX48qNdQEoE7wKBqet3nmmk8tunHgrDWPQ8q6M/DK\nvh1lH3/yrppPb346xKMdhgoGgcjBXLyOSSlmiDEUqTj0qjATassTUQCOfR+ZmJ+l\nRJsqOtxANaHeDKI6KMph7XyHuN6T+GUSXR8ke5ozwQKBgQDi0R3cY728mbyNZq4f\naNa9duux9I7bmqQeRTKs0uWat3MgbpLAbnU9t3RimRbvA9RyB1ex+kND6SMY+3p6\n17FIxCicQXkPxbTfxWFXm7wD41RnbpGTSdkWtBtXErfuHiFZhKEMq5MscqmYO2dL\nsNaNjaN0RDyBbsFJ8z2vFeHYeQKBgQDBUba9OHDhHWXp+h2RFegtrlJaenhUBGSU\nd56RSloQkXzUNN0DbmIpFxmAGB4SgIDy0lwumBK8pLLmNJQSrBWIY0qM40rrilmi\nlU2LQy7/dpBm5gyqBGzlIY7Skt3I7aL4pApBt6UIdQXpq0swAz0nDZLAwOgoXRB1\nvGiJH6DEIwKBgQDScJzY7v2KL8U+GEdzQu0CCoTxreqhm5+rqh4zNNTssEozjAPC\nYHmMklp8ZHdfuVjxlxhpO74PEw6KTkC8GsUUs1LObvyogpGnkFUZWJefr9qOwIp2\ncmzlYKOBLQ/T8MaWbLSTsdixw4zQfkT/eAoIeaJu7CSLHjxdpT3U5WOOWQKBgQCT\nvsbBkKw8cAJessf8BVkf6HWKLsVduMnB6jXm5oM03GwhppEvOSKOMthLXKNHEqz6\nZ6kJ9zGCuQD9DTwJlTkTtobYbDHrGB5vMlpET8FQfqXX7oPJQH6VE3ObHaGhGXUP\nQBeSqC7Z6s3tCvv4otEO0sHQzN3hU1bsFGV0PxbYLwKBgFaM8g0A8YrGM4zx8yJ3\nlGMDLC1q7WFwRhG9/Aq5ARlrkf7o1yxRRJskTUh3Ssn7o2PbMqivp6MjVZVMwEoi\ntl2K/hjWoPcK8l0rxLAU15GJL282IAm9QNW12341235435311324WKAo\nL+0/t9g8UU9gJYerfvAAsQAj\n-----END PRIVATE KEY-----\n"}
+{"cmd": "cleanup", "type": "tls-sni-01", "status": "valid", "domain": "bristol3.pki.enigmabridge.com", "token": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA", "validation": null, "key_auth": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "tls-sni-01", "status": "valid", "domain": "bs3.pki.enigmabridge.com", "token": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE", "validation": null, "key_auth": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
 Stderr: 
@@ -443,10 +597,10 @@ Stderr:
 ```
 Saving debug log to /var/log/letsencrypt/letsencrypt.log
 Starting new HTTPS connection (1): acme-staging.api.letsencrypt.org
-Obtaining a new certificate
+Renewing an existing certificate
 Performing the following challenges:
-tls-sni-01 challenge for stoke2.pki.enigmabridge.com
-tls-sni-01 challenge for st2.pki.enigmabridge.com
+tls-sni-01 challenge for bristol3.pki.enigmabridge.com
+tls-sni-01 challenge for bs3.pki.enigmabridge.com
 Handler output (pre-perform):
 
 -----BEGIN PRE-PERFORM-----
@@ -457,15 +611,15 @@ Handler output (perform):
 -----BEGIN PERFORM-----
 cmd: perform
 type: tls-sni-01
-domain: stoke2.pki.enigmabridge.com
+domain: bristol3.pki.enigmabridge.com
 uri: 
-validation: 
-key-auth: HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
-z_domain: 5622ec18934aae89a99151c76c564e76.806248d277161f80d69ed6514efb083a.acme.invalid
-cert_path: /var/lib/letsencrypt/HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.crt
-key_path: /var/lib/letsencrypt/HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.pem
+validation: 9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid
+key-auth: xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+z_domain: 9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid
+cert_path: /var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.crt
+key_path: /var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.pem
 port: 443
-json: {"cmd": "validate", "type": "tls-sni-01", "domain": "stoke2.pki.enigmabridge.com", "z_domain": "5622ec18934aae89a99151c76c564e76.806248d277161f80d69ed6514efb083a.acme.invalid", "cert_path": "/var/lib/letsencrypt/HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.crt", "key_path": "/var/lib/letsencrypt/HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.pem", "port": "443", "key_auth": "HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQC6afBA93Xzb+UgPfmf6c9DANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjYyMzQ3MzRaFw0xNjExMDIyMzQ3MzRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAuKjflYNA3YUWfheBOWw0JNOlTcM4Wt5iHobLo6/x9T1fPMDL/pVAwLPQkOnn\niRo/tlwMU6Gv14NTw1S7YRHuGmHCKx8P6PqYrkJTFmcp8PQfVIW5QmYbWPX2GQNw\n36I4ljSeYWI5v+GuRwkg5r7Ya/Xcnt2lHqoD6smL7mChw/cMNulHnzp5GeA9QUhf\nm819nGCBaUYw/Dxg93bIeiCZEsyXiu1N2ARpJNnf2WqrUXsQhhcTRKkiIhkD8kJX\nL9wB+RaT/Ik+le6HGhrbqHWFT2hu2WqvdrGtTBi0jNLQpVcm389aUqE0vgpNSHLr\naIkHM+yuHErxoMM5JDFZb5drHQIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk41NjIyZWMxODkzNGFhZTg5YTk5MTUxYzc2YzU2\nNGU3Ni44MDYyNDhkMjc3MTYxZjgwZDY5ZWQ2NTE0ZWZiMDgzYS5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBALBJs1n0gthJyjQ4BOsy20y0vZSrtoPMAZLo\n9tAnxbfTyhIXLW4B+ZkF2h/+QjBksEZRQUsNEizhZ7s0+AQHGr+PAOwRI1XkUx43\nrdMg7pXBU5ViyE2qYbx8ZRC9XkCYmiZB6R9FWprD/gTsudgUMhteqguvOOfe9cm4\nHuM361+Y/96awwz1cYP9zMT2mUQEVRlM3/RtcxwQGAJLHuTH0lDZ521YuhlERuwu\nrW9w9FZzoDgCXwsrusmjf7/N5aUMXcZUIOC9vPqS3xL3EPn/cZQbOjjtARPioQgu\nu8lNcgYoPnS9VO/esgKMqV6+fB92fcOAFuONaCzzlmlLt1qZVBk=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC4qN+Vg0DdhRZ+\nF4E5bDQk06VNwzha3mIehsujr/H1PV88wMv+lUDAs9CQ6eeJGj+2XAxToa/Xg1PD\nVLthEe4aYcIrHw/o+piuQlMWZynw9B9UhblCZhtY9fYZA3DfojiWNJ5hYjm/4a5H\nCSDmvthr9dye3aUeqgPqyYvuYKHD9ww26UefOnkZ4D1BSF+bzX2cYIFpRjD8PGD3\ndsh6IJkSzJeK7U3YBGkk2d/ZaqtRexCGFxNEqSIiGQPyQlcv3AH5FpP8iT6V7oca\nGtuodYVPaG7Zaq92sa1MGLSM0tClVybfz1pSoTS+Ck1IcutoiQcz7K4cSvGgwzkk\nMVlvl2sdAgMBAAECggEALjzKz0swQMeEXEpSZyh63gXIzHHneIlalD44W2JA+aFG\naZX0/mgs8JOV09Nd0GysK2NdCsvfld0iajSbPrEYp652yglbGIE3HdsppuBqFhVq\niuV4//FFQ79CwfyklLqv5JyEU+oef7doxgy5Gk4LLu0/MuBY6ha0KGQTD7tOhhy3\nG9sUTPJ0+z5vbLfJGTLCEFivBFWcfKz0AcnIxrgbHYMMgHVyqkufqBv3VOcqbP6B\nYL1MyAtT0/IM6uT2NFFit+FGZFscLFIVgd036NbylugzapMt1oMwB6YaBHscOwL8\nabEGz67exjsgnwbkbnczlgAoObQAmkJxrE5WDWSLAQKBgQDfV641bJXjcevDUDWT\nxTtP/KmQ6HZ1T6xixxh5U9L3tRZFSwfwflzlVsaiBbt1POGuna01JmK/By3vlgM9\nQrE6L4hQSfudBmwToXN9wNi1Q53tzciLIzV2/hV5g7pPztPnSXh5i8ILCZrZdj2v\nq82azMGDjCnbTXarRCatf0s6fQKBgQDTqTBF9YJj1WRZ0YLHFJGQ0v8dul3WqHPm\n3uBAGmbvv2X61WDWsWK38fYr34BrxiWHfCshhYQClQn0XXcWyVL7T4/Z9vvSrdUa\nlPj1qbqGQlktylpH3ke5dWK1lPsp6Va7+Rj/52M6OVHcbxdyAUEN6L+NYIuB3o/K\n1Edp1D01IQKBgHDyj5hW9KpUd22Lx7yWVvuJhFtTJG0JQN2nYDojaSJ6QuwCGN7H\nmMUmkEdp7LZKdrtu5CRn6DJBODrcu4CklKofVal88LEliUyYLqbe+vkYW+riUdQD\nl0s5DbUpJ/SqXUGvRyz4v8YDMntdL68CjHUHramQHa7ZSvUr/v9oy6ulAoGATLkr\ncnCID0Au3BAB48Ak8+ZH67K+iS0OtkVb7GClp4otoTrvm2M5cYwXu9eMaYSt3eq4\nh7IqI/V6YkXvASeBGO/CKTRKHBg/Ax+1DvezUS+DvAF5sEt2nFdcrI2QbaTTd9fX\npAtwAI7+iXULfpvNxQj1Rn4Uk8LlRJSmPkpc1YECgYB1pLvi6PXGKQrD4WrZNDLV\nTbJhgZXqnOfBMLlU4bBXHMNcxyHMcc2a8D5k1sQMbkmz+ACKprCrwCbChTNoO3d7\n4V13uhfZx58SwzxpPegLzlzJGpAnIN0top6jGbMYA+Y9xdQT/szd06psH2qF8ryq\nGvxKjvrib2Ozb8FyOmQPhw==\n-----END PRIVATE KEY-----\n"}
+json: {"cmd": "perform", "type": "tls-sni-01", "domain": "bristol3.pki.enigmabridge.com", "token": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA", "z_domain": "9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid", "validation": "9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid", "cert_path": "/var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.crt", "key_path": "/var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.pem", "port": "443", "key_auth": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQL7xAiyGGk2XO7z+MAyWxUTANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjcxNTI3MjRaFw0xNjExMDMxNTI3MjRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAn9lru0+nkHAhKoOe6VCd+tBEThcjMb+bYiY5LpMDA1SJdOw7/h+xo6mdQdTi\naUV+CCJvyo5EZeHs8hsIYgT8wzla9QACwptbPIPN4ieD7EEhjzw/fTF6JBsoewBU\nJQqP9Z7K67EquTj9B0DddUc6/R7eLWP2THcNf5DXa/+F7Mkl1RWZCaXwNheymNJ9\nlk5qqQnW5GoXHtnb1U0XH4dIDbCG/kBZ1w9NwVktbOT3wNcPTp9Afly05jn9pOb2\n5pAyntspnImd7IpDlYG/eYo3SS+OeD1XO8C/Qtx9BYE/BQtNdfSnGpGL70zT4rQz\nhvY6UJosfSdRrKaEwg3AkRAB1wIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk45ZTE4NDI5OTI1NTY0ODMyYjRhY2VhNTM2YWVi\nMzBlOC5jMDZmNDYzOGE5NzNkMjc1NmFiM2ZmMTdiOGVkNjhiOC5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBAD/bhdmAB9r2diWE5/P9yoBBv2TkVzPmF3W5\nA7DPVICERcvCXWqSUM5Evl66YFNkFeGY9NnT7/1EhwaCyfQqs0KRo1WoE6cQZn5i\nF/d5Zw97MDKF6ny1edZgC5mCvTvVgDOFrdsYAL3BH5KXzDhljPnPJ4bKkq6cPY2M\netO+2x+LYqxZpgwLXbEcIJGddFIPHIGa6rMHcwqq4qbR7rK2QZg0RlVicU1cg5Nz\nYPYso6knGlauWj0wh3siuAZxWj3ulwiSpkOH9Nc/O3sM1QZW/KUsauB9zwbqcfmp\nqOFUAR5LW6M9AoA8Jpsb/ELWz64BNQ0c/UoF5iwg6+lgkg9cntU=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCf2Wu7T6eQcCEq\ng57pUJ360EROFyMxv5tiJjkukwMDVIl07Dv+H7GjqZ1B1OJpRX4IIm/KjkRl4ezy\nGwhiBPzDOVr1AALCm1s8g83iJ4PsQSGPPD99MXokGyh7AFQlCo/1nsrrsSq5OP0H\nQN11Rzr9Ht4tY/ZMdw1/kNdr/4XsySXVFZkJpfA2F7KY0n2WTmqpCdbkahce2dvV\nTRcfh0gNsIb+QFnXD03BWS1s5PfA1w9On0B+XLTmOf2k5vbmkDKe2ymciZ3sikOV\ngb95ijdJL454PVc7wL9C3H0FgT8FC0119KcakYvvTNPitDOG9jpQmix9J1GspoTC\nDcCREAHXAgMBAAECggEBAJo8DEHwyqqINsgxtaxD2BsAx1dd5dyDl6btYLE6smaN\nNBA4PG6oIBvdddnmUgvnPIMWzyzvdrmjc5/rS3xgeY7ZEZViTEd/5VmPh6EWJalY\n8sulA1GF4udhuP5tw8L13Q/PBtbB3IpZnXNZOBWIBDflh9TeJfGD0edrVyBirdNY\nf64Xm7DI59tqEv8aG1c9CbmmreP7XQqbK7zbXEg/PP+JfedBdccKPrlcDnzSoA78\n+XoNHPI0GyJ2JhSzApfulJyloa1MGd20XUyJgDTT66zaiCI/UoTUvAUolBDdZqJw\nRiGYFPb5yDI3SnW98WUurLE+VpE15fKNoZlGl6ToQSkCgYEA1FQrWPSzIltDJwui\ncQNWKQpT0Pin4rYb9TjrY5qwDJAoAjBjjvbKphBA63OO3O8xy7TlZn13CAV9Kok8\nI/LYLzANZTNYwfRy0h3aGQj/0qX0O6hdse742Yo6KGrpTGH1ur/Xb1x3H0poevEK\nB/hYYQV2IGv/wcWIKN+bygPsRl0CgYEAwLoHUIl1b1wqGzAN1Zl/jsiXCeGyhGGV\nWMFQkWFjCuYAAVd+gFOzKji6mEIAHg8oHDe3UkODYxkDXJJhxg/rT/qX/sTMeo65\nIcRihVe6PS/dKHA6gTMmQwuQHrKggAHsGFMz9qDHF3QuBXhYT6Xi72LLoYwt4IEj\nJLzc+Xr3fcMCgYBJ0PlA89FTIGc4K9NNdtt9aRm6jLfRGX6ewisTdbO+ql8+Y5Q5\nH5NUKFJpiMMiDAZDy5/1AalgIIhjQVKnLMX7obkGddNlmpZQdhBco8RMd2VxWBc6\nxNm+x09wvbpd07CaPBepn3vKZRPtqd7S5oPTNxLaMrG3q/SqQRLoKHT8AQKBgQC1\n6qLe5XFBFUj1cs2MMqDSAQt4m17rUEUtiwPmxns7nVCh85mHvfnfP77520rLFNly\nkTDsaKfLUZ/3sICz+PDQBKWWKOMuSCv98KZiYSV9fgGOmyjOLZ7PKEn4f/m5+paF\ne3wQL0DeJZ8PMMKDI/1qouG9clkXki2/DrqyjtywCwKBgHrwsxNOandciH8BZ0vr\nvuZnzs/6KIpywHM8u/qRI8P3l/2nQx/rbh9Bip+k3wK6MMmKbYCU2ZS322eldOqW\nmT6iwRkseQsm/sO7IbcO/6pvW2345234523453425342523452345EqD3m\nE2UjyPLbhfR9Ey8KBetqmgy9\n-----END PRIVATE KEY-----\n"}
 -----END PERFORM-----
 
 Self-verify of challenge failed.
@@ -474,15 +628,15 @@ Handler output (perform):
 -----BEGIN PERFORM-----
 cmd: perform
 type: tls-sni-01
-domain: st2.pki.enigmabridge.com
+domain: bs3.pki.enigmabridge.com
 uri: 
-validation: 
-key-auth: D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
-z_domain: 61f21f3436004bf6d3943238bddf4bea.fef2bfabc3c2895f5aace483a5986b02.acme.invalid
-cert_path: /var/lib/letsencrypt/D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.crt
-key_path: /var/lib/letsencrypt/D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.pem
+validation: 73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid
+key-auth: CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0
+z_domain: 73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid
+cert_path: /var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.crt
+key_path: /var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.pem
 port: 443
-json: {"cmd": "validate", "type": "tls-sni-01", "domain": "st2.pki.enigmabridge.com", "z_domain": "61f21f3436004bf6d3943238bddf4bea.fef2bfabc3c2895f5aace483a5986b02.acme.invalid", "cert_path": "/var/lib/letsencrypt/D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.crt", "key_path": "/var/lib/letsencrypt/D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.pem", "port": "443", "key_auth": "D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQBKl0xmWnQyv+BiIrTTUIODANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjYyMzQ3MzRaFw0xNjExMDIyMzQ3MzRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEA1JBtAfRosRsTa91q5uuIX2hXcjFLyfoYnLxRtUymAzBdn4JkSJ9Wh9tEobnt\n9bmNnmmFPAxOOK7gBECqyTwd6s1549PcEDaYrsAsLcchpwAFX7Iu4AwIOzEP70k7\nBIefgJPlhRxfTycalkiV0Bg2qYLCEU0HXOnsXx0vQFVMZaeeDhZI16qcb+xDamBc\nTz3d2J4hiFmbxQKKdK+HZKtc+VdbXSW18u7sCwO11eHBcexyflF6CLgEB2sUUQ7e\n8WOJ7JxrcuUIp5qJneyasGDaKsnqr3izKhLwfr4ni3oyZ2uYPJA7/85c102+d/aF\nesJyQAOAUa/bwNFf1cvh2024JwIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk42MWYyMWYzNDM2MDA0YmY2ZDM5NDMyMzhiZGRm\nNGJlYS5mZWYyYmZhYmMzYzI4OTVmNWFhY2U0ODNhNTk4NmIwMi5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBAEy0Bqah+nFcUc3OtJ5KYEBw9vBRKrSCPX+J\n/vWHgKAQ4h8VzkrAjAZBRfLddzBwuJbyxkjteef+7sAbdjdp5PAWfu5u6nCxFJTc\nBSSZQ+kyj3kjoB5eQrY3Eq99e6LirqECKxKl1jE4eb5FyU7ItEFXOAiKwvAq5FnB\nMLCm3WgG3N72/SIvSf2upBMCMkHtnZmSQhr/XbbQcBk0oWhmgUkRnee+4/wAuxqf\nZ2SBcM+gAlbgEjWF07sjRDg2PGFjD5Xk3JX+EKz6wJ7eTFjBdhicyCxtxmFtLxgL\n+ljW8a8UzQ+9CJFxRtKDg+0esN3p9nc/G5kXqMM5kNaAqLp6BjA=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDUkG0B9GixGxNr\n3Wrm64hfaFdyMUvJ+hicvFG1TKYDMF2fgmRIn1aH20Shue31uY2eaYU8DE44ruAE\nQKrJPB3qzXnj09wQNpiuwCwtxyGnAAVfsi7gDAg7MQ/vSTsEh5+Ak+WFHF9PJxqW\nSJXQGDapgsIRTQdc6exfHS9AVUxlp54OFkjXqpxv7ENqYFxPPd3YniGIWZvFAop0\nr4dkq1z5V1tdJbXy7uwLA7XV4cFx7HJ+UXoIuAQHaxRRDt7xY4nsnGty5Qinmomd\n7JqwYNoqyeqveLMqEvB+vieLejJna5g8kDv/zlzXTb539oV6wnJAA4BRr9vA0V/V\ny+HbTbgnAgMBAAECggEBAI0L9LlKU7nJbJ6zgr8N5STh2Ly2R0MTyAcg0tsJrFML\nYeR5IlAqIsHtVmI2PNdDs9w8yqLoy3LDX3SS8ICtenCWvd3Wc/zyLWgvrmEF9Kea\n1PYGByK1+TRFvvwZzKaZ09X+zVsBU6DzIqo8KeS2XHcog9v1EACwXB9U/0iiERqV\n4zKcMM7R2A18Hbbh87lFcPZxg5UWo5hywKZTA7PVi5kEUzUcggPKv42vXH4xn0z2\nTLPbGDFxB8/lKM+19bv0JzgosMhT5bhla8WUsAv+K1wZmdIgpsNZ+cZHFgRc/VNj\nRBjoqKPScIMG0z1RbENKug1RIGqlu0TcpfLpYuJ3atkCgYEA/KkbmXiR79JbqOYn\nOxFbIY/aorqwlEtQkaSGswtblQqi/m1aHmFLbvh9YIw/iPP8bSQ4AZmUHmh2HLFf\nfhNcPOLoyoCu6nSAlLZ2f2wphh++xF2KxSE/M19v3HAIrw8yNrDRiqk7qshGTBrh\nmmH685HhdP6E95Eu6GiyvtEnnGUCgYEA11+mPflBqjk3mYEETcq3DExsJYa3iULy\nHTX61222wavjvqS9c4EmqxlNDCiIC4Ninx1cSpokYNCVO1Epg/QHOS+K6/SykKM6\nDPOn+FSA8NxHZtdVa7NJjQaHb1sG4Y+XkTde3qnxEKy9peVdDtBUjX8/08Q0kFqz\n/J40PC7f+5sCgYEAs+iOmId8EzLMxcWspajEJW/TlRAucEn4wtxOdeteeRAr49Nl\n2kAZgJk8XaVAEHr7gZPKtYjwKX7kq6W5g4KxqUFB1gAvjQ8MB9itJCqWnsS4CAc7\nqwbzg9cvRd4YsN63OK5LZtr+e6tEMyjpAA9IrGtyCOa7M7WTmzYCIVG5TOkCgYBl\n0oq98gHhgHuQzzZBsP0pi1f1xeMvub7NoJ+fCffFSIa7sxb+bKjja2rJvL/U8aDG\nqRLhEk7wlqx3BsAh6lUf7CI5u85QI1tmlCttdEYhmYMIU/XGnVTAn72YH+j46vI1\nbYAktSOLRp/CttVwE35mBysd6z0OolNFs2Xurhqm0QKBgQCzzI3yaTfahBV61cyQ\nAyXCDRqJeYNOwORnyfo5uHFdyqpbxCiHl8AWq072GB58wMUl6Xgl8cg0qENcRJmu\n53Ar3FDMgwe2azqpkX0kYqegG3DU3fMc2ICg+75kHp9phdP0SjtUNxDoU8aL3f1X\nGobGNYJ8QPFBqqb2J7+fmXCInw==\n-----END PRIVATE KEY-----\n"}
+json: {"cmd": "perform", "type": "tls-sni-01", "domain": "bs3.pki.enigmabridge.com", "token": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE", "z_domain": "73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid", "validation": "73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid", "cert_path": "/var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.crt", "key_path": "/var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.pem", "port": "443", "key_auth": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQOBpsqM/b5w2xCpImjT8EeTANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjcxNTI3MjRaFw0xNjExMDMxNTI3MjRa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAq0gNleuNFlA4bNVPPEOUp1HQhg0nHi75VPyzfPG8iDcOltW+iwrfMz7eRk1T\nYruXvQxisoH1hyv2ndEFH7hqc5IRX8kCt9lPNSmBYov+krLG8Sxy1uqTQ5y81YXy\nyr/oTSNGtIceyjW4oN+HtlIHOJjlFkvhSammmLP5S/GlR8Qo33bpAVXx1paNClJt\nH1bAYc3wZ6RNXVCFazbaE5yzN1WucsXrwFYkxyPA/sf76/OLsCaHGdSH2v2L5S+h\nPKRFQoI9AsbRU6uIiP7WsGTn1BnivXvtlLEw3VZMS3BuzPNn4Tam/h16fxViTb5c\nJQabxOOOX5m5t3rUOYLP2j08iwIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk43MzQ1M2UxOWRhNDk1YTdkNWZlMTVkNzM1NmJj\nNTc5OC42NDIyZjNmNWU1NTZhOGZjOTI2OTllZjliMmZlMTk3NC5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBABHFzi+TrNUsU4LswMJqJ5NqU3LjwdZxe974\n+eP3s4cOpoRwBh7PQKzlc4KiB1qv2MTqTjVNiGnFEw3bvs6oUHM610U0yOvuxdIy\nAZ6KfzOO2Hoj8V4v/c+uO2yqiCK33JTprYnie+fgodt3GDv0JcQuUznfBSRS4T2A\nbM3yEZSLKyQL3EmA8Y6DJov/Dh7B8sEepXv3lewO3NxhubhDzG90zYqYq0Ddn56D\nWnduSJ6wIxu/R0ccryBr4nO8ZENqC7h7//GNE7wtCyeNeHyJ/ePcD00MDWyiy80o\nk/GFatmNr8iT73UnN5qgt7LpVxzHHRxcIVPJWu2YDVaGH4oA28o=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCrSA2V640WUDhs\n1U88Q5SnUdCGDSceLvlU/LN88byINw6W1b6LCt8zPt5GTVNiu5e9DGKygfWHK/ad\n0QUfuGpzkhFfyQK32U81KYFii/6SssbxLHLW6pNDnLzVhfLKv+hNI0a0hx7KNbig\n34e2Ugc4mOUWS+FJqaaYs/lL8aVHxCjfdukBVfHWlo0KUm0fVsBhzfBnpE1dUIVr\nNtoTnLM3Va5yxevAViTHI8D+x/vr84uwJocZ1Ifa/YvlL6E8pEVCgj0CxtFTq4iI\n/tawZOfUGeK9e+2UsTDdVkxLcG7M82fhNqb+HXp/FWJNvlwlBpvE445fmbm3etQ5\ngs/aPTyLAgMBAAECggEATh97MtpRa9ADLIDOtyoL75U9iycMpJPAXac1JtQLrgWO\nvfWYB0taKsGOGHrEgdAWkb/IdKsaFiFTRwBDWgh/ZV9GVW4Vs02G9zSLMyuvXbH1\nU6N2bdhoevpOlwWVjCykBCsG4OiQfqKqJ5ZNDDe123bBZr4Nb8/VkOjl2GHLhUOP\nz4ootHaPxBjqmHxAJO+b7xeiX48qNdQEoE7wKBqet3nmmk8tunHgrDWPQ8q6M/DK\nvh1lH3/yrppPb346xKMdhgoGgcjBXLyOSSlmiDEUqTj0qjATassTUQCOfR+ZmJ+l\nRJsqOtxANaHeDKI6KMph7XyHuN6T+GUSXR8ke5ozwQKBgQDi0R3cY728mbyNZq4f\naNa9duux9I7bmqQeRTKs0uWat3MgbpLAbnU9t3RimRbvA9RyB1ex+kND6SMY+3p6\n17FIxCicQXkPxbTfxWFXm7wD41RnbpGTSdkWtBtXErfuHiFZhKEMq5MscqmYO2dL\nsNaNjaN0RDyBbsFJ8z2vFeHYeQKBgQDBUba9OHDhHWXp+h2RFegtrlJaenhUBGSU\nd56RSloQkXzUNN0DbmIpFxmAGB4SgIDy0lwumBK8pLLmNJQSrBWIY0qM40rrilmi\nlU2LQy7/dpBm5gyqBGzlIY7Skt3I7aL4pApBt6UIdQXpq0swAz0nDZLAwOgoXRB1\nvGiJH6DEIwKBgQDScJzY7v2KL8U+GEdzQu0CCoTxreqhm5+rqh4zNNTssEozjAPC\nYHmMklp8ZHdfuVjxlxhpO74PEw6KTkC8GsUUs1LObvyogpGnkFUZWJefr9qOwIp2\ncmzlYKOBLQ/T8MaWbLSTsdixw4zQfkT/eAoIeaJu7CSLHjxdpT3U5WOOWQKBgQCT\nvsbBkKw8cAJessf8BVkf6HWKLsVduMnB6jXm5oM03GwhppEvOSKOMthLXKNHEqz6\nZ6kJ9zGCuQD9DTwJlTkTtobYbDHrGB5vMlpET8FQfqXX7oPJQH6VE3ObHaGhGXUP\nQBeSqC7Z6s3tCvv4otEO0sHQzN3hU1bsFGV0PxbYLwKBgFaM8g0A8YrGM4zx8yJ3\nlGMDLC1q7WFwRhG9/Aq5ARlrkf7o1yxRRJskTUh3Ssn7o2PbMqivp6MjVZVMwEoi\ntl2K/hjWoPcK8l0rxLAU15GJL28223452345234523452345352534WKAo\nL+0/t9g8UU9gJYerfvAAsQAj\n-----END PRIVATE KEY-----\n"}
 -----END PERFORM-----
 
 Self-verify of challenge failed.
@@ -503,11 +657,11 @@ Handler output (cleanup):
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: tls-sni-01
-domain: stoke2.pki.enigmabridge.com
-status: pending
-token: HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw
-error: 
-json: {"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "HAiv_Hd2Tt3zd1t3m7AxQtFh6bffewWSICRN6jXsMpw", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
+domain: bristol3.pki.enigmabridge.com
+status: valid
+token: xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA
+error: None
+json: {"cmd": "cleanup", "type": "tls-sni-01", "status": "valid", "domain": "bristol3.pki.enigmabridge.com", "token": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA", "validation": null, "key_auth": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
 -----END CLEANUP-----
 
 Handler output (cleanup):
@@ -515,11 +669,11 @@ Handler output (cleanup):
 -----BEGIN CLEANUP-----
 cmd: cleanup
 type: tls-sni-01
-domain: st2.pki.enigmabridge.com
-status: pending
-token: D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc
-error: 
-json: {"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "D08c3AuKkWBV6xebn1lmSb4RxHYZ5l6agiu5OoEYaPc", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
+domain: bs3.pki.enigmabridge.com
+status: valid
+token: CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE
+error: None
+json: {"cmd": "cleanup", "type": "tls-sni-01", "status": "valid", "domain": "bs3.pki.enigmabridge.com", "token": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE", "validation": null, "key_auth": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
 -----END CLEANUP-----
 
 Handler output (post-cleanup):
@@ -527,7 +681,8 @@ Handler output (post-cleanup):
 -----BEGIN POST-CLEANUP-----
 -----END POST-CLEANUP-----
 
-Failed authorization procedure. st2.pki.enigmabridge.com (tls-sni-01): urn:acme:error:unknownHost :: The server could not resolve a domain name :: No valid IP addresses found for st2.pki.enigmabridge.com, stoke2.pki.enigmabridge.com (tls-sni-01): urn:acme:error:unknownHost :: The server could not resolve a domain name :: No valid IP addresses found for stoke2.pki.enigmabridge.com
+Generating key (2048 bits): /etc/letsencrypt/keys/0243_key-certbot.pem
+Creating CSR: /etc/letsencrypt/csr/0243_csr-certbot.pem
 ```
 
 
