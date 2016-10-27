@@ -10,6 +10,9 @@ import sys
 import tempfile
 import time
 import json
+import math
+import types
+import calendar
 import collections
 from collections import OrderedDict
 import atexit
@@ -38,6 +41,7 @@ INITIAL_PID = os.getpid()
 
 
 @zope.interface.implementer(interfaces.IAuthenticator)
+@zope.interface.implementer(interfaces.IInstaller)
 @zope.interface.provider(interfaces.IPluginFactory)
 @zope.interface.implementer(interfaces.IReporter)
 class AuthenticatorOut(common.Plugin):
@@ -125,6 +129,7 @@ s.serve_forever()" """
         self._root = (tempfile.mkdtemp() if self.conf("test-mode")
                       else "/tmp/certbot")
         self._httpd = None
+        self._start_time = calendar.timegm(time.gmtime())
 
         # Set up reverter
         self.reverter = reverter.Reverter(self.config)
@@ -352,9 +357,13 @@ s.serve_forever()" """
             val = json_data[k]
             if k == 'command':
                 continue
+            if isinstance(val, types.FloatType):
+                val = str(math.ceil(val))
+            if not isinstance(val, (str, basestring)):
+                val = str(val)
             if val is not None:
                 n_data[k] = val
-                n_data['cbot_' + k] = json_data[k]
+                n_data['cbot_' + k] = val
 
         n_data['cbot_json'] = json.dumps(json_data)
         return n_data
@@ -551,6 +560,71 @@ s.serve_forever()" """
                              "with %s code", self._httpd.returncode)
             shutil.rmtree(self._root)
 
+    #
+    # Installer section
+    #
+
+    def get_all_names(self):
+        return []
+
+    def deploy_cert(self, domain, cert_path, key_path, chain_path, fullchain_path):
+        cur_record = OrderedDict()
+        cur_record['cmd'] = 'deploy_cert'
+        cur_record['domain'] = domain
+        cur_record['cert_path'] = cert_path
+        cur_record['key_path'] = key_path
+        cur_record['chain_path'] = chain_path
+        cur_record['fullchain_path'] = fullchain_path
+        cur_record['timestamp'] = self._start_time
+        cur_record['cert_timestamp'] = self._get_file_mtime(cert_path)
+
+        if self._is_json_mode() or self._is_handler_mode():
+            self._json_out(cur_record, True)
+
+        hook_cmd = "deploy_cert" if cur_record['cert_timestamp'] >= cur_record['timestamp'] else 'unchanged_cert'
+        if self._is_handler_mode() and self._call_handler(hook_cmd, **(self._get_json_to_kwargs(cur_record))) is None:
+            raise errors.PluginError("cleanup handler failed")
+        pass
+
+    def enhance(self, domain, enhancement, options=None):
+        pass  # pragma: no cover
+
+    def supported_enhancements(self):
+        return []
+
+    def get_all_certs_keys(self):
+        return []
+
+    def save(self, title=None, temporary=False):
+        cur_record = OrderedDict()
+        cur_record['cmd'] = 'save'
+        cur_record['title'] = title
+        cur_record['temporary'] = temporary
+        if self._is_json_mode() or self._is_handler_mode():
+            self._json_out(cur_record, True)
+
+    def rollback_checkpoints(self, rollback=1):
+       pass  # pragma: no cover
+
+    def recovery_routine(self):
+        pass  # pragma: no cover
+
+    def view_config_changes(self):
+        pass  # pragma: no cover
+
+    def config_test(self):
+        pass  # pragma: no cover
+
+    def restart(self):
+        cur_record = OrderedDict()
+        cur_record['cmd'] = 'restart'
+        if self._is_json_mode() or self._is_handler_mode():
+            self._json_out(cur_record, True)
+
+    #
+    # Caller
+    #
+
     def _call_handler(self, command, *args, **kwargs):
         """
         Invoking the handler script
@@ -561,6 +635,27 @@ s.serve_forever()" """
         """
         env = dict(os.environ)
         env.update(kwargs)
+
+        # Dehydrated compatibility mode - translate commands
+        if self._is_dehydrated_dns():
+            auth_cmd_map = {'perform': 'deploy_challenge', 'cleanup': 'clean_challenge'}
+            install_cmd_map = {'deploy_cert': 'deploy_cert', 'unchanged_cert': 'unchanged_cert'}
+
+            if command in auth_cmd_map:
+                command = auth_cmd_map[command]
+                args = list(args) + [kwargs.get('domain'), kwargs.get('token'), kwargs.get('validation')]
+
+            elif command in install_cmd_map:
+                command = install_cmd_map[command]
+                args = list(args) + [kwargs.get('domain'), kwargs.get('key_path'), kwargs.get('cert_path'),
+                                     kwargs.get('fullchain_path'), kwargs.get('chain_path')]
+
+                if command == 'deploy_cert':
+                    args.append(kwargs.get('timestamp'))
+
+            else:
+                raise errors.PluginError('Unknown command for handler script')
+
         proc = subprocess.Popen([self._get_handler(), command] + list(args),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
@@ -579,6 +674,13 @@ s.serve_forever()" """
                 logger.info("Handler output (%s):\n%s\n%s",
                                command, stdout, stderr)
         return stdout
+
+    #
+    # Helper methods & UI
+    #
+
+    def _get_file_mtime(self, file):
+        return os.path.getmtime(file)
 
     def _is_text_mode(self):
         return self.conf("text-mode")
