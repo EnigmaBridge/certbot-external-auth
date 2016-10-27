@@ -455,7 +455,7 @@ s.serve_forever()" """
         json_data[FIELD_DOMAIN] = achall.domain
         json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
         json_data[FIELD_VALIDATION] = validation
-        json_data['txt_domain'] = achall.validation_domain_name(achall.domain)
+        json_data[FIELD_TXT_DOMAIN] = achall.validation_domain_name(achall.domain)
         json_data[FIELD_KEY_AUTH] = response.key_authorization
 
         if not self.conf("test-mode"):
