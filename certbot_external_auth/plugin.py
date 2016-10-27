@@ -28,6 +28,7 @@ from certbot import interfaces
 from certbot import util
 from certbot import reverter
 from certbot.plugins import common
+from certbot.display import util as display_util, ops as display_ops
 
 
 logger = logging.getLogger(__name__)
@@ -147,10 +148,15 @@ s.serve_forever()" """
             help="Switches handler mode to Dehydrated DNS compatible version")
 
     def prepare(self):  # pylint: disable=missing-docstring,no-self-use
-        # Re-register reporter
+        # Re-register reporter - json only report
         self.orig_reporter = zope.component.getUtility(interfaces.IReporter)
         zope.component.provideUtility(self, provides=interfaces.IReporter)
         atexit.register(self.atexit_print_messages)
+
+        # Re-register displayer - stderr only displayer
+        #displayer = display_util.NoninteractiveDisplay(sys.stderr)
+        displayer = display_util.FileDisplay(sys.stderr)
+        zope.component.provideUtility(displayer)
 
         # Non-interactive not yet supported
         if self.config.noninteractive_mode and not self.conf("test-mode"):
