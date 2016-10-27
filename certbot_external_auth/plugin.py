@@ -293,6 +293,8 @@ s.serve_forever()" """
             raise errors.PluginError("post-cleanup handler failed")
 
     def _get_cleanup_json(self, achall):
+        response, validation = achall.response_and_validation()
+
         cur_record = OrderedDict()
         cur_record['cmd'] = 'cleanup'
         cur_record['type'] = achall.chall.typ
@@ -307,6 +309,8 @@ s.serve_forever()" """
         cur_record['status'] = None
         cur_record['domain'] = achall.domain
         cur_record['token'] = b64.b64encode(achall.chall.token)
+        cur_record['validation'] = validation
+        cur_record['key_auth'] = response.key_authorization
         cur_record['validated'] = None
         cur_record['error'] = None
 
