@@ -143,6 +143,8 @@ s.serve_forever()" """
             help="Original text mode, by default turned off, produces JSON challenges")
         add("handler", default=None,
             help="Handler program that takes the action. Data is transferred in ENV vars")
+        add("dehydrated-dns", action="store_true",
+            help="Switches handler mode to Dehydrated DNS compatible version")
 
     def prepare(self):  # pylint: disable=missing-docstring,no-self-use
         # Re-register reporter
@@ -180,13 +182,13 @@ s.serve_forever()" """
         # TODO: group achalls by the same socket.gethostbyname(_ex)
         # and prompt only once per server (one "echo -n" per domain)
 
-        if self._is_handler_mode() and self._call_handler("pre-perform") is None:
+        if self._is_classic_handler_mode() and self._call_handler("pre-perform") is None:
             raise errors.PluginError("pre-perform handler failed")
 
         for achall in achalls:
             responses.append(mapping[achall.typ](achall))
 
-        if self._is_handler_mode() and self._call_handler("post-perform") is None:
+        if self._is_classic_handler_mode() and self._call_handler("post-perform") is None:
             raise errors.PluginError("post-perform handler failed")
 
         return responses
@@ -270,7 +272,7 @@ s.serve_forever()" """
     def cleanup(self, achalls):
         # pylint: disable=missing-docstring
 
-        if self._is_handler_mode() and self._call_handler("pre-cleanup") is None:
+        if self._is_classic_handler_mode() and self._call_handler("pre-cleanup") is None:
             raise errors.PluginError("pre-cleanup handler failed")
 
         for achall in achalls:
@@ -287,7 +289,7 @@ s.serve_forever()" """
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
 
-        if self._is_handler_mode() and self._call_handler("post-cleanup") is None:
+        if self._is_classic_handler_mode() and self._call_handler("post-cleanup") is None:
             raise errors.PluginError("post-cleanup handler failed")
 
     def _get_cleanup_json(self, achall):
@@ -574,8 +576,15 @@ s.serve_forever()" """
     def _is_handler_mode(self):
         return self.conf("handler") is not None
 
+    def _is_classic_handler_mode(self):
+        """Handler mode && not dehydrated"""
+        return self._is_handler_mode() and not self._is_dehydrated_dns()
+
     def _get_handler(self):
         return self.conf("handler")
+
+    def _is_dehydrated_dns(self):
+        return self.conf("dehydrated-dns")
 
     def _json_out(self, data, new_line=False):
         # pylint: disable=no-self-use
