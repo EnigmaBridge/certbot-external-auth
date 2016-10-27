@@ -1,15 +1,12 @@
 ## External authenticator for Certbot
 
 This plugin helps with domain validation process either by calling an external 
-program or by printing JSON challenge to stdout for invoker to solve.
+program or by printing JSON challenge to stdout for invoker to solve. 
+Handler is compatible with [Dehydrated] DNS hooks.
 
-Supported challenges:
+Supported challenges: _DNS-01_, _HTTP-01_, _TLS-SNI-01_
 
-* DNS
-* HTTP
-* TLS-SNI
-
-This plugin only supports authentication, not installation.
+This plugin supports manual authentication and installation.
 
 ## Installation - pip
 
@@ -25,29 +22,39 @@ To use, try something like this:
 ```bash
 certbot --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d example.com certonly
 ```
 
-There are 3 modes of operation:
+There are 3 main modes of operation:
 
 * JSON mode (default)
 * Text mode - fallback to the `manual.py` operation
-* Handler mode - auth performed by an external program
+* Handler mode - auth performed by an external program. Supports [Dehydrated] and augmented mode.
+
+If you want it to use as Authenticator and Installer, use
+`--configurator certbot-external-auth:out` certbot flag, for Authenticator only
+use `-a certbot-external-auth:out`
+
+In authenticator mode one can use certbot actions `certonly` or `renew`. 
+If installer mode is enabled too use `run` action - typical for [Dehydrated] hooks.
 
 ### JSON Mode
 
 JSON mode produces one-line JSON objects (`\n` separated) with a challenge to process by the invoker 
-on the stdout. 
+on the STDOUT. 
 
 After the challenge is processed, the invoker is supposed
-to send a new line `\n` character to the stdin to continue with the process.
+to send a new line `\n` character to the STDIN to continue with the process.
 
 Note JSON mode produces also another JSON objects besides challenges, 
-e.g., cleanup and repots. The `\n` is expected only for challenges (perform/validate step).
+e.g., cleanup and reports. The `\n` is expected only for challenges (perform/validate step).
 
-Reporter was substituted to produce JSON logs so stdout is JSON only.
+If plugin is installed also as an Installer (or Configurator), it provides also 
+commands related to the certificate installation.
+
+Reporter was substituted to produce JSON logs so STDOUT is JSON only.
 
 ## Arguments
 
@@ -62,6 +69,10 @@ Reporter was substituted to produce JSON logs so stdout is JSON only.
         If set, enables handler mode. Commands are 
         sent to the handler script for processing. 
         Arguments are sent in ENV.
+        
+--certbot-external-auth:out-dehydrated-dns
+        If handler mode is enabled, compatibility 
+        with dehydrated-dns hooks is enabled
 ```
 
 ## Examples
@@ -78,7 +89,7 @@ Run the certbot with the following command:
 certbot --staging \
         --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
@@ -91,13 +102,13 @@ Stderr contains string log / report, not in JSON format.
 Stdout:
 
 ```json
-{"cmd": "validate", "type": "dns-01", "validation": "rwfX5jrRQXOiXLOgPL0RM4QtVx0oEIK_pA4Y4eSjqOI", "domain": "_acme-challenge.stoke2.pki.enigmabridge.com", "key_auth": "AfWfkObOD6vyCKXA1tE0Y2Eub9kvltKB7DH5zGxSG04.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "dns-01", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "txt_domain": "_acme-challenge.bristol3.pki.enigmabridge.com", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 
-{"cmd": "validate", "type": "dns-01", "validation": "BTDDPMZp8JSLTMfWHguVmdRv-BXVfEBWhfdDyQPCv_I", "domain": "_acme-challenge.st2.pki.enigmabridge.com", "key_auth": "he2pUhw6DWhhnqkxIaLrUAJPpswA_6OSXUUInw0uDkY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "dns-01", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "txt_domain": "_acme-challenge.bs3.pki.enigmabridge.com", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 
-{"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "AfWfkObOD6vyCKXA1tE0Y2Eub9kvltKB7DH5zGxSG04", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "cleanup", "type": "dns-01", "status": "pending", "token": "he2pUhw6DWhhnqkxIaLrUAJPpswA_6OSXUUInw0uDkY", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   connection", "Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.stoke2.pki.enigmabridge.com", "", "Domain: st2.pki.enigmabridge.com", "Type:   connection", "Detail: DNS problem: NXDOMAIN looking up TXT for _acme-challenge.st2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address. Additionally, please check that your computer has a publicly routable IP address and that no firewalls are preventing the server from communicating with the client. If you're using the webroot plugin, you should also verify that you are serving files from the webroot path you provided."]}]}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU", "validation": "667drNmQL3vX6bu8YZlgy0wKNBlCny8yrjF1lSaUndc", "key_auth": "_QLSFTRw6qbQaN7gTglBYZuU1L7KAP-bXB_41CAnAvU.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "dns-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4", "validation": "ejEDZXYEeYHUxqBAiX4csh8GKkeVX7utK6BBOBshZ1Y", "key_auth": "3gJ87yANDpmuuKVL2ktfQ0_qURQ3mN0IfqgbTU_AGS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
 After `{"cmd": "validate"}` message the client waits on `\n` on the standard input to continue with the validation.
@@ -110,7 +121,7 @@ Run the certbot with the following command (just `preferred-challenges` changed)
 certbot --staging \
         --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
@@ -121,13 +132,13 @@ certbot --staging \
 Stdout:
 
 ```json
-{"cmd": "validate", "type": "http-01", "validation": "M7eaUb9BYXH8kb1IuTvjxcj5UmhZjbVrHfRHdhjatS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://stoke2.pki.enigmabridge.com/.well-known/acme-challenge/M7eaUb9BYXH8kb1IuTvjxcj5UmhZjbVrHfRHdhjatS4", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" M7eaUb9BYXH8kb1IuTvjxcj5UmhZjbVrHfRHdhjatS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/M7eaUb9BYXH8kb1IuTvjxcj5UmhZjbVrHfRHdhjatS4\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "M7eaUb9BYXH8kb1IuTvjxcj5UmhZjbVrHfRHdhjatS4.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "http-01", "domain": "bristol3.pki.enigmabridge.com", "token": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "validation": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://bristol3.pki.enigmabridge.com/.well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 
-{"cmd": "validate", "type": "http-01", "validation": "E2MeY_tgp6yPw9K8ivMb_TCMTSrOkF0zbjxIInu0yXQ.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://st2.pki.enigmabridge.com/.well-known/acme-challenge/E2MeY_tgp6yPw9K8ivMb_TCMTSrOkF0zbjxIInu0yXQ", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" E2MeY_tgp6yPw9K8ivMb_TCMTSrOkF0zbjxIInu0yXQ.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/E2MeY_tgp6yPw9K8ivMb_TCMTSrOkF0zbjxIInu0yXQ\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "E2MeY_tgp6yPw9K8ivMb_TCMTSrOkF0zbjxIInu0yXQ.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
+{"cmd": "perform", "type": "http-01", "domain": "bs3.pki.enigmabridge.com", "token": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "validation": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "uri": "http://bs3.pki.enigmabridge.com/.well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "command": "mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge\ncd /tmp/certbot/public_html\nprintf \"%s\" L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0 > .well-known/acme-challenge/L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0\n# run only once per server:\n$(command -v python2 || command -v python2.7 || command -v python2.6) -c \\\n\"import BaseHTTPServer, SimpleHTTPServer; \\\ns = BaseHTTPServer.HTTPServer(('', 80), SimpleHTTPServer.SimpleHTTPRequestHandler); \\\ns.serve_forever()\" ", "key_auth": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0"}
 
-{"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "M7eaUb9BYXH8kb1IuTvjxcj5UmhZjbVrHfRHdhjatS4", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "cleanup", "type": "http-01", "status": "pending", "token": "E2MeY_tgp6yPw9K8ivMb_TCMTSrOkF0zbjxIInu0yXQ", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
+{"cmd": "cleanup", "type": "http-01", "status": "pending", "domain": "bristol3.pki.enigmabridge.com", "token": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY", "validation": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "key_auth": "oRezdno4N00Cfp2bLqJe45Ad3mwJ0q3xqIr7HML7RcY.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "http-01", "status": "pending", "domain": "bs3.pki.enigmabridge.com", "token": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0", "validation": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "key_auth": "L1xK8bOfybszr3MSJpf0oNZkxCDLLY1qzCKUwSwDYj0.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
 ### Example - TLS-SNI
@@ -138,7 +149,7 @@ Run the certbot with the following command (just `preferred-challenges` changed)
 certbot --staging \
         --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
@@ -149,13 +160,13 @@ certbot --staging \
 Stdout:
 
 ```json
-{"cmd": "validate", "type": "tls-sni-01", "domain": "stoke2.pki.enigmabridge.com", "z_domain": "271c1cc2d19ad0d19bc70e0de6b54478.26590d8a282d0ea1744a6e8acab92042.acme.invalid", "cert_path": "/var/lib/letsencrypt/kPGFQWIJr1HM07UgRLLp1FCeVrx3N60CwP_QV9c5hHs.crt", "key_path": "/var/lib/letsencrypt/kPGFQWIJr1HM07UgRLLp1FCeVrx3N60CwP_QV9c5hHs.pem", "port": "443", "key_auth": "kPGFQWIJr1HM07UgRLLp1FCeVrx3N60CwP_QV9c5hHs.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQDdQModuq16h2S98RWViUNTANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjYyMjI2MjNaFw0xNjExMDIyMjI2MjNa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAk/Cd5YZQ06wlWD+wyzDK234/ZiTQeseJE1GfoPhWO3K3Vem8AVzvNxud85Ot\npurD1/GA+8BmhSYxSk+aI5mAE94d10uhFzrMMqFOCdkesq5f3PLcItQBz3xQmKHW\n/HEsQVRYwgTAOw+uARjDc12suBdVEHzn5OMrC7Om+gvn5Ibb9u23sDzzu2F2YVCw\nUO//izMNbjS24gHaKkvOa1Q3JHiNQSg0Cn9xWBgo0yNHQtWosTgUSBL6HmWlOiM/\nFqP+bZZLWg3h6dPWCIEsEkxcUOh3eKrMBSp8WEHVQpmRg+uBek+toZ7rWM+4jnZN\nGbqY56mLjZbmB57pphmpBix5WQIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk4yNzFjMWNjMmQxOWFkMGQxOWJjNzBlMGRlNmI1\nNDQ3OC4yNjU5MGQ4YTI4MmQwZWExNzQ0YTZlOGFjYWI5MjA0Mi5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBAGJqiKVuOOETaHrTgCmD/0B5A9EKlYQNiznw\nouG6DxQIG/egtpELSXiEmfT1D+VTtyx5vcm9HKCwXyckjED0WOOlFANvRp5XeKBe\nOfONcozSRK0+GUKan1N+UDGuMSUIYdgFDUo1uW/Qg39DeLOrhwYCxdiwKL/ioA+a\nh1FHr+oTniZ80LWtwWNcp++vZQUjqkcBt6pKTsCQ+uQ73dtgswIlHVUNiSQcjcD9\nMqpVjzWm2E2WwJkrdPrCvaA5kjGZj77ywLkBBMtAZju3MZGX3qoL/2AeQExcAawB\n3h80nLh30d1Lj95Gz92lvvEbstqqsRPK6ck3XmaDkCmAc36XOoU=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCT8J3lhlDTrCVY\nP7DLMMrbfj9mJNB6x4kTUZ+g+FY7crdV6bwBXO83G53zk62m6sPX8YD7wGaFJjFK\nT5ojmYAT3h3XS6EXOswyoU4J2R6yrl/c8twi1AHPfFCYodb8cSxBVFjCBMA7D64B\nGMNzXay4F1UQfOfk4ysLs6b6C+fkhtv27bewPPO7YXZhULBQ7/+LMw1uNLbiAdoq\nS85rVDckeI1BKDQKf3FYGCjTI0dC1aixOBRIEvoeZaU6Iz8Wo/5tlktaDeHp09YI\ngSwSTFxQ6Hd4qswFKnxYQdVCmZGD64F6T62hnutYz7iOdk0ZupjnqYuNluYHnumm\nGakGLHlZAgMBAAECggEAI9+xKjtL1khkNeYb5OnMBzWyAf7jXyKLptegMdSGdJv4\nwSiQonP6vg5AWxRwg41iODcj4+hf8+GzCiYLZp6OZEL0UYTRZ2Smp5Bd8B1qSEHo\nlRd/MiLe3YVztc9o5oY7CQx/CW1FgAzpUPLEUnFgtLNTuU/Qm7xKb+f8kZ3ZeZyr\n0DQwgzOo0NjmAnUDK/LDeCxNlNiJOQQ5p4lg3HhcE7XTtfDBmPY3G+9fB/3gbIVH\nrVT0acH/uvLlCZTYX6Ts0ARnqi+LKLb+r6zG9qTYOVWvgmHOYMpPxDjHPfocp0cf\njFrI3ZGSdaqzzN9huaxsjn+LEWHn+bmMS6t3rv/0AQKBgQDDaOjsD6ETK9NIpTty\n6kVs+4hH1ds0jGP8iQl8G0ESpaiLg6S7cR2CobbxLOvNxV08/Tv4p7WgpqFB2pe1\nRZ7bFkYiirMI6uFLp78azHgAeJgE0lUmZGUwPqxl+22Oz5SFRWopIv7gVBiPmkeS\nCzhqaRuZ4EK3BLgjvrna8HhBeQKBgQDBz62J+l0uhNTh1znQChtHUX20HV+pW2R5\nwnVpesaFRoe4Wka3ZUH4uskq5sQQnakQ30Zfj8QZZ3y8m6HuIkBpLGE9Yy5uKJol\nPI3lqN5+SFX5xMqFC+o1osHGSQTKsCe1dymbConggO1j+6uQUb508GjN5piG+JE8\nQExbKFTe4QKBgQCcx34hb4S3YfEZluA0mbtr7f9wSyedaIoMIlKGzUMPV/P7Q3qW\nnPGlTmP96iGirZfaB/7myH/Tzf0RXfVcDeifNKa+rfNo0zJBRevw713UWuz06WBB\n9kitRYuCIxDKhMdPidrb+GTvzOkLxidoCDKSRZRMh/5e4p1uqGZrP4XsWQKBgG8P\nhh+CI7GLlr4P6mYn1Hfq38C98FqJL6uCXmviWi53O0DOIqXnVYWl66806/elkQNF\nHvuV08bHAbjG6mUepZBfSR23XxzrEWHzMFEBkvYEl5f4SCEzsbOon6fzodZQWYDo\nVyQsRtQqrV5VEnwyC5TRSw1qbc8yU2+WXOsD0pahAoGAfbpouBLbqO+y661K/pFu\nuEviE27r+9mRascUt6OpGCzwDsFu/aaadVmPxaiyqM0758pt8SixvvWvBj3gKcfY\nJdrMGxE73JG0PdlcatX34tzQjtFPaA9NQwVtrj28HQaleGgCOwn2tW1wPndUZFGK\nGUcZuhu0c0WkD83bnYKw3v8=\n-----END PRIVATE KEY-----\n"}
+{"cmd": "perform", "type": "tls-sni-01", "domain": "bristol3.pki.enigmabridge.com", "token": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA", "z_domain": "9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid", "validation": "9e18429925564832b4acea536aeb30e8.c06f4638a973d2756ab3ff17b8ed68b8.acme.invalid", "cert_path": "/var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.crt", "key_path": "/var/lib/letsencrypt/xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.pem", "port": "443", "key_auth": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIzCCAgugAwIBAgIRAKlpRT1rCUNQ02c/1ydKaegwDQYJKoZIhvcNAQELBQAw\nEDEOMAwGA1UEAwwFZHVtbXkwHhcNMTYxMDI3MTUyMTQ1WhcNMTYxMTAzMTUyMTQ1\nWjAQMQ4wDAYDVQQDDAVkdW1teTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC\nggEBAKlZxWiP1LHEd5CP8tL8ymeeE/Yz5S3CB0/JmFY5vx6wZuqJE7TJ4175BiZ6\n8PxmnMt+5NhRLfY6PfXvpy7ypsDbMItCSWpxRfo9BKsgxdczWsyKMVqPwnWnD+Zv\nXHeTqYrzh/I+J/iLxTtEie48GOeE4xhJLlzUATxGonXrtg5IOJevmu/pp3tQ31MC\nBSKSUcw96yzcRytO9HNLNqpjTrtjXb58ztphlBcqgjtTXWbT+pxJef1W8ReMTTXQ\nyNQz77fH0q7CMBiqyDfriPoP2u0ilKrAgLw+pYi35Cs1KwK6Z+LoYvADpe9JDG2t\nl1kdghG5PT12OeTTxUevZqSzkVUCAwEAAaN4MHYwEgYDVR0TAQH/BAgwBgEB/wIB\nADBgBgNVHREEWTBXggVkdW1teYJOOWUxODQyOTkyNTU2NDgzMmI0YWNlYTUzNmFl\nYjMwZTguYzA2ZjQ2MzhhOTczZDI3NTZhYjNmZjE3YjhlZDY4YjguYWNtZS5pbnZh\nbGlkMA0GCSqGSIb3DQEBCwUAA4IBAQCNSKUr8Yf+w2HtcgiA6VEvGTgAmUZGdFGg\niM/5tefansWvyroneK93a7XsPC/IUYwAsnGz/l36qKvFUHtSpbo0mdUk7X3xPN4q\naDPa1zhGIXKCBBuP4GbKesgjMr1RZEYgJ1sRR3LArFLsd2ZdRqlYi1tKkryUOs1+\njVDHGpiUEx0IIOPFMPsnR/83bJ9UkOChwnlBxy8C/MriETKRVczPUYVut1KJ9On0\n4Lebi/4lAt2kknPlMi+Fl1gutcg0d27MIEXKKnyj4ZZVElJ78gbAKYO7S6NK1EyB\ns9U9DJoCATaCNSjDJXaH9oqbliP1s7USrTEh7TTnY75dI0i40/OT\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCpWcVoj9SxxHeQ\nj/LS/MpnnhP2M+UtwgdPyZhWOb8esGbqiRO0yeNe+QYmevD8ZpzLfuTYUS32Oj31\n76cu8qbA2zCLQklqcUX6PQSrIMXXM1rMijFaj8J1pw/mb1x3k6mK84fyPif4i8U7\nRInuPBjnhOMYSS5c1AE8RqJ167YOSDiXr5rv6ad7UN9TAgUiklHMPess3EcrTvRz\nSzaqY067Y12+fM7aYZQXKoI7U11m0/qcSXn9VvEXjE010MjUM++3x9KuwjAYqsg3\n64j6D9rtIpSqwIC8PqWIt+QrNSsCumfi6GLwA6XvSQxtrZdZHYIRuT09djnk08VH\nr2aks5FVAgMBAAECggEALQzegPRSJoAXNnO0qv/ocCwTL1may9Nj0ovUZIu0Fdvj\nZNzWSy+xtqAUTMRDu0Eo0NGO2yStT2Uq+nOoS8rtJTyp60HU+eXsMadtyIBNYPQe\nYW8ZtfesSVQJ3MkfFghH/9jM/1odk/bKnvuana+LCHvHVbySAsu7EGfR7ACqS53n\ny1OmLaj1lNx8RGdMgpHB3ItoI1Yb0Mkvd9nLtK6wR13ODEG89YjjZI5MrSot+ZjJ\nr3dt0hix3aZuLop8wWOBty5atDm0ThPMT8tl12Boi8FK0UuF4zGVQp+02SjyBmgx\nUq+JDLEV0uCwuMpuALUT83bAEoI73rVAcxLbrhw5uQKBgQDcTh/BWw6w1oH0t8Gt\norOl2hZDPJtqcfxnGoO46O5gAbOyEWUzpFqqMA2U/hNbkO9/bc+7agArbV1at7dL\nVO7cn4qz0SuQZtFk6MdieHVEl/8IykDPeMF6SdBMKxkrEXgCPqgkjf5H9c+/ffnS\nu3LmizwAV92VaCvD9V69gG4EdwKBgQDEyiSMAGnKaxlvgzSUytARyhQWQ0XWfBrl\nb27G/gHxbSb4vJJ+PFBg6OEsn4ChElIIs6SDuq8zDh41wprlQXnVHkmahnoolOuX\nHr9G6sRC7OKbBaxuh3vAqqQsPKPADCC3TQQDlcPmAdYM3PpbWDmPkI1WmsquDAsT\nUbzmVIZHkwKBgD1Z+Ff1jsrKghhvkB1V4Se/61FAMJvdMIhaBvLY04GjF7LwSzmt\nfJ5GkZG7jBKE812ObDpqE7AEXeoknYP6HCcOuybGipZFO+0ZMmWG3EmE9r4w7Qma\nPG9c3QhJPFIVJFGjt1muvXC20OsoHwmDsETp44TI82lnQEDrNT4a5QiTAoGAGglg\nwoE/ff+jkuR6LYGT+/aPp85ozBMJf/e5YWy0FxxI/rn8a+VRATFusXe9DhKddfdG\nugMWMRwaFSTVV6XNF8x1EpPeT8Y8UXdI+XoQU4aCCN68TLdyQTCSniO7yqoQHhB7\ninnjPGhbyMHoAfPvUbZfbOj4DgUb5gd3hcYDKi8CgYBCdM0XgwxoY6P0znIws6Ka\ngRXivDqHAD1dO5F84rAwpaUVIBXmUBhKZkJ0GbuEc5zV5OLs9mzm81oa8CYBEGnz\nyD0YR12341234123443645457muA6L+DC/vriFC37ueuMLoTWZEbURjIm71+TrCagdJ\nPcobS+a762mUxguRIeiNxQ==\n-----END PRIVATE KEY-----\n"}
 
-{"cmd": "validate", "type": "tls-sni-01", "domain": "st2.pki.enigmabridge.com", "z_domain": "2b6de2ffbeafcf72fa2500fcb94d8f01.c063b3eb7cccc4101b9bebae3f93d233.acme.invalid", "cert_path": "/var/lib/letsencrypt/dbowNJLZiuxPO83RQv1egT12cgnFP_VPvbGmMKWWfQg.crt", "key_path": "/var/lib/letsencrypt/dbowNJLZiuxPO83RQv1egT12cgnFP_VPvbGmMKWWfQg.pem", "port": "443", "key_auth": "dbowNJLZiuxPO83RQv1egT12cgnFP_VPvbGmMKWWfQg.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIzCCAgugAwIBAgIRAMIQsaVSIBl+KZTZrcHJRoUwDQYJKoZIhvcNAQELBQAw\nEDEOMAwGA1UEAwwFZHVtbXkwHhcNMTYxMDI2MjIyNjI0WhcNMTYxMTAyMjIyNjI0\nWjAQMQ4wDAYDVQQDDAVkdW1teTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC\nggEBAKoXB5o1mY/BcUUEeYqvNBFl9CRUsgU8l5IYUvm4kyXPS7ieu9u9LJj3fHQD\no/Q2Wlwq8nQ4ZbmHuE11MdQvjxGarWk+zeJRZ7/JIVFdGkPCbYs1Q8UEbfHzUKU2\nwH0alT/REeJbiazRdRpzpLO9RmCT7WvH2Q911/N2WULKR1dkhmEUE0lsINhbt5ZM\na9UjzinW0arZKzIl6SZcut/30uhuDYkN/Y3KUEBBq530q2e2YdZafUGEyinjH8Df\nr4n+jmIG+Dxs+ymFCzsnAICIJwYx4iVr6HYenKcXvG9k6dDazpK5PbuzMJrv4MMP\nE/0hfqlhOjmvRp8TopIDt+eYZucCAwEAAaN4MHYwEgYDVR0TAQH/BAgwBgEB/wIB\nADBgBgNVHREEWTBXggVkdW1teYJOMmI2ZGUyZmZiZWFmY2Y3MmZhMjUwMGZjYjk0\nZDhmMDEuYzA2M2IzZWI3Y2NjYzQxMDFiOWJlYmFlM2Y5M2QyMzMuYWNtZS5pbnZh\nbGlkMA0GCSqGSIb3DQEBCwUAA4IBAQCUz5lKTe9P25XlB0Of50LWIRUxL/4+u7UH\n4EaAadkKofmKzSAQxLG9ORkWO8T0OrW5rqvOao2WYWnoEdtgu/XKXq3NJxp9RRK7\nxsF3TYhk04GNsH3ycbwoUOkD1rsAt5YW9ls+IDECTKKVc1FfVlMR0JUszpTzzvBW\nnUuCzlXylcgNVzzRSuckMZMsfIwkyT9v1XjviYK0auUv/eEryLqBXn9Qke6YyVWd\nDDOg0oLFo9hPLy5bVOr7XLa0Yd83r5GYg0IwtuE4emL56QkX7U7Uz+zTRo/tKQIR\nhKJIxzR7AxOBuv8OP5G8iPxzCEGTNVAuLKYoUikLtY61vLhfoBN8\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCqFweaNZmPwXFF\nBHmKrzQRZfQkVLIFPJeSGFL5uJMlz0u4nrvbvSyY93x0A6P0NlpcKvJ0OGW5h7hN\ndTHUL48Rmq1pPs3iUWe/ySFRXRpDwm2LNUPFBG3x81ClNsB9GpU/0RHiW4ms0XUa\nc6SzvUZgk+1rx9kPddfzdllCykdXZIZhFBNJbCDYW7eWTGvVI84p1tGq2SsyJekm\nXLrf99Lobg2JDf2NylBAQaud9KtntmHWWn1BhMop4x/A36+J/o5iBvg8bPsphQs7\nJwCAiCcGMeIla+h2HpynF7xvZOnQ2s6SuT27szCa7+DDDxP9IX6pYTo5r0afE6KS\nA7fnmGbnAgMBAAECggEBAJs0Anrjd+kmEY5xw9oZfwB1MK7KHdsLbB8iVOyLULIK\nksS3CyI6X2yBP624+K1Jv3AkvDHymFgQEMuVKc+9SeY9ZwkHBuUBdRMam21b8DBu\nRHjnNJydKxnA9RCcgk5lqFSgGJqc/maUhi+J4HsmNgbAVL+pj1Y9KL1+e3qniyuh\nEFtYcBnS0mYla8Pe295ImBnQsMYXnMVbESq1jQ5swmrAWhwtri5+/jRiDEBC5aJL\nwiYVwWqYWrpOYK1gy4aqQlvB+9QDkgTY1v7xU8OT0GLzmGFz0mRqQ5w+Dcwgg5yB\nqzDe/GC+hPQn6Sw0QV9AVUSIJLisqWMMLQ175DW4RWECgYEA3IU89mT8HP5eaoS0\ncJCr40BZWbKQ7AJyMgz+TGkfPYq7DMiYOO3o1cQ67DQgdtSLC62IeaQmMYZ7M57B\n9VTr7/VApPqsM/LvyZc8Ctr1/GRhwyxYF5WN158aWY6kqJHacdDEIgLIW8V7U+pY\n4KVx0Jx3DnLFyDKqHFte6FQBtvcCgYEAxXSrBJ5j3XCAS7+8kSCIahhFtTVj0PD8\n7+uDceJ/awJKeS7ffJxvFiKW5ho/PGqmMyNsL/RU/RTpofbLyJFRVnNdo3EVuSYW\n5y/Caq+etamo7aGqYhd5LX2e7t2f585Pi/pBHS3R0dAa0mSZmP5n4h6C+Jq0y89X\nMFueLCtEI5ECgYEAnu/9D02blD4VyMoazyLGcIUZoRedci0VJ1PMGUCO/qk1xbHy\nXN3EOgYzvbiYSW1JRkJtodaYnItj0sGy4+KwJoPqcr4lTU/kWbSB1wUX1DB5cdVN\nLLpiwCzxLeksbj6pZezk3+qHg/VivQmjw04bKRMMkEJSoMc7ajLExch+b+MCgYBR\nsQUYMheLBAJwVHFFcbo+erBMWjxjs3BSKpQFR/oDYb1CCbx4p5fmBoV7yZwj+NOu\nEJev91w6IK7QTXTeFBEcvToeZqjgIvwSxdWfoez9p6W2Os5tKtz9jx10IckIdHjA\nptbNpalLLtgJ94j8nTSJfqodBJSMRcoCvcTg7T2RoQKBgQCo4hIi2PshYncc+6gc\ncTqkPfS4IF59v2HMXGonyVC6eZcM7pwLTvWIFfYLlhr838F9uVZLnO1MKVoUPeBl\np/n3bUjlMSO7cuLOpdXWfK8bea9HU1X7Zl5KN4BVnsmJBnbvb34Dkf0td3HRRKVZ\n4GFDMzVLriGYPLas1QURwtpUjQ==\n-----END PRIVATE KEY-----\n"}
+{"cmd": "perform", "type": "tls-sni-01", "domain": "bs3.pki.enigmabridge.com", "token": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE", "z_domain": "73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid", "validation": "73453e19da495a7d5fe15d7356bc5798.6422f3f5e556a8fc92699ef9b2fe1974.acme.invalid", "cert_path": "/var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.crt", "key_path": "/var/lib/letsencrypt/CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.pem", "port": "443", "key_auth": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDIjCCAgqgAwIBAgIQGEaZihGes4PR9QWjLDB8/TANBgkqhkiG9w0BAQsFADAQ\nMQ4wDAYDVQQDDAVkdW1teTAeFw0xNjEwMjcxNTIxNDZaFw0xNjExMDMxNTIxNDZa\nMBAxDjAMBgNVBAMMBWR1bW15MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAsV/srITsHg97SkqyN2Fr2gb06nXLUkF5SgV8/jzNwtltmrAuJWbf+yDWteoY\nc9ZH5kgiWwDUzxiai1kKKjPGso7d36r6mSn5NwJsxPyapNUKGQy4dkwvEjueClgn\ngQDIoIL5nX0EqqAYMrDpnbdHqeg605ZVc/nzbbRN5K/28nwBncg49MIfwuq2niHf\nXR+hcc3MA2cWexdtVxhT4vuB1JORP5BmXu5CQAxXuaC5Fk6WmAo78P6mhMsgGzfb\nIAIsiZxQaf+NftagwvT2dZLvuSpF2ipIGXOX/ooB6vwn+v5wNH0DSjWv1nJUdra7\n0xIDDwRN2ceJX1I24QJKUrYkowIDAQABo3gwdjASBgNVHRMBAf8ECDAGAQH/AgEA\nMGAGA1UdEQRZMFeCBWR1bW15gk43MzQ1M2UxOWRhNDk1YTdkNWZlMTVkNzM1NmJj\nNTc5OC42NDIyZjNmNWU1NTZhOGZjOTI2OTllZjliMmZlMTk3NC5hY21lLmludmFs\naWQwDQYJKoZIhvcNAQELBQADggEBAB1dKs/TLq7b7BEtnwiSr+0SxSWOUzyaYCKM\nh+2qlg6rrxzy2Rec41kGniQCPwOxrZBJJf/qvSQV1hasUG2gvuca2L7eWEbYrIRH\nOUq4kjbzYPIbAKSkaXR/21Rpn5J8TNSfPVMvm2hvTQFylODVnTRLcA0KQJlhkMGn\nuaXCrgQY3wKWCTGYU4KE0AQCyEf/M3wGEAfWjx6KuTfuRLfpXOL+gSEnf+y6n3BK\nE7lzTGZGvqKeRypL1SN7w5Zo6r2m/YKcZ9Sv1Z2f2hG8at0zYWdys/Zj0+xFBjlb\nMFIDwdEzG21AM4ZriRUbiaqpVECtbiBg2tpqK6V1Ga9Nolu9hbs=\n-----END CERTIFICATE-----\n", "key_pem": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxX+yshOweD3tK\nSrI3YWvaBvTqdctSQXlKBXz+PM3C2W2asC4lZt/7INa16hhz1kfmSCJbANTPGJqL\nWQoqM8ayjt3fqvqZKfk3AmzE/Jqk1QoZDLh2TC8SO54KWCeBAMiggvmdfQSqoBgy\nsOmdt0ep6DrTllVz+fNttE3kr/byfAGdyDj0wh/C6raeId9dH6FxzcwDZxZ7F21X\nGFPi+4HUk5E/kGZe7kJADFe5oLkWTpaYCjvw/qaEyyAbN9sgAiyJnFBp/41+1qDC\n9PZ1ku+5KkXaKkgZc5f+igHq/Cf6/nA0fQNKNa/WclR2trvTEgMPBE3Zx4lfUjbh\nAkpStiSjAgMBAAECggEAWa3lLKib9Org7APuLT/tVrOzuqNJ5FHEMB+sPaKiacSi\nvNYczr4/umm1BQ7RxCdv/Mc1z4sRDZAj+xZOpF2/NWI0XbTFtRDatuxb8BDDY1lv\nHJEo5m7IUdCgrBw8BOZPiZAPAohGBrqg4Wg/BYW4DviiXX4hwFx8rle+FkS9d4VR\nXbVcFk6YreWfX+VXuiAxA6E+ej+Grrc7KVrn+PNxwCaiVEyCnXulp/ni2ZkHTWu8\nzOXhVd2q4J5gVTcyB1oDUx7s7jcvQw/8XowGTBbz0nRMfCPySi+4u0UK1OKqGdah\n/fa/7TMo6wbFLBjg0yzbhxQG/6yL8fkRbY9aG3iZKQKBgQDe5WLKPd6DZl8rVcom\no2CW4DcWKM7ejPFo+Zy/KYOOMeaFDm3CuO4ww/N0YQ/+R92LaYjqiF8ijA2sTyUr\n2LNizS4rejGgDDGsgcLfw+ePn7oAk8utTTuuNsctmJ3bNwLdddp9IBNxJBxncprU\nuFybkOejaG7vNgZDrapJIoB6JQKBgQDLt8uz5TN1cyAyhcwV19L3KZZikmU4SqEH\n6CfYKGkHBeXKiYOP7JE3CymbwN3rr2X4fNVf73rZnJ8RBBzzWwYslMFmIJvEUBeG\n47NeVgefyAlsR6gNWYLHSqn1bZdBfU6+naeZ09txdmhfuXvEZhvaWO4pn0vDuxH2\nqC111hyVJwKBgQCFa69HueMAqn2bFf4sRK1jgpDWzdSOeLVkjc2ay8G4kvwWdz2S\nSlohjJmk9xi4r9HYSnKvWLQBnO3uT23DojI2mPTjB4C++a2eQgohIUXxvb177PwF\nH27y6E0vaORMvNAVOh9vuIyKs//gmEQ/wp+EayeMs817mM4FIuYEYweelQKBgQCs\n6QHjXWWCCQeJGnuRBrEvzIKyg+OaFe38UhaPqC0NIvpaIMIkRP00pSrZ4qf6RdPd\nR8esOA4j6oYw4TbZb6cb698DmiXcSMbPXTF/nrG18wnceC2xtwoDseH0SOKbWYqe\nzB3XuTSHZ6NLrJnap3h4qgbsGSMrrPqgSzray7NS/QKBgEgMVMyVQZiDIWCIfhGT\nmN4F5jci5CelXs37x1AOIgWL6bVgACB0u8B0P9YZGejKI6uZ8xZYIbnCOvZqTrtS\nTJPGBf23456456234523564352345346577QVesr2yMLI6t7PqoQSqJpw\nIp70HxIrTO4pBys08WVCHbXx\n-----END PRIVATE KEY-----\n"}
 
-{"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "kPGFQWIJr1HM07UgRLLp1FCeVrx3N60CwP_QV9c5hHs", "domain": "stoke2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "cleanup", "type": "tls-sni-01", "status": "pending", "token": "dbowNJLZiuxPO83RQv1egT12cgnFP_VPvbGmMKWWfQg", "domain": "st2.pki.enigmabridge.com", "validated": null, "error": null}
-{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["The following errors were reported by the server:", "", "Domain: stoke2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for stoke2.pki.enigmabridge.com", "", "Domain: st2.pki.enigmabridge.com", "Type:   unknownHost", "Detail: No valid IP addresses found for st2.pki.enigmabridge.com", "", "To fix these errors, please make sure that your domain name was entered correctly and the DNS A record(s) for that domain contain(s) the right IP address."]}]}
+{"cmd": "cleanup", "type": "tls-sni-01", "status": "valid", "domain": "bristol3.pki.enigmabridge.com", "token": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA", "validation": null, "key_auth": "xgg9AwsMl8Rtdwh_ZkHozmDEr9G4Z1noCqnbRXp3zyA.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "cleanup", "type": "tls-sni-01", "status": "valid", "domain": "bs3.pki.enigmabridge.com", "token": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE", "validation": null, "key_auth": "CES4DhcXqr4lxuoae0qINKSndCnRUIE6SegCP6hJBdE.tRQM98JsABZRm5-NiotcgD212RAUPPbyeDP30Ob_7-0", "validated": null, "error": null}
+{"cmd": "report", "messages": [{"priority": 1, "on_crash": true, "lines": ["Congratulations! Your certificate and chain have been saved at /etc/letsencrypt/live/bristol3.pki.enigmabridge.com/fullchain.pem. Your cert will expire on 2017-01-25. To obtain a new or tweaked version of this certificate in the future, simply run certbot again. To non-interactively renew *all* of your certificates, run \"certbot renew\""]}]}
 ```
 
 ### Example - Handler, DNS
@@ -166,7 +177,7 @@ In this repository there is a default [handler-example.sh] which can be used as 
 certbot --staging \
         --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
@@ -285,7 +296,7 @@ Run the certbot with the following command (just `preferred-challenges` changed)
 certbot --staging \
         --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
@@ -408,7 +419,7 @@ Run the certbot with the following command (just `preferred-challenges` changed)
 certbot --staging \
         --text --agree-tos --email you@example.com \
         --expand --renew-by-default \
-        -a certbot-external-auth:out \
+        --configurator certbot-external-auth:out \
         --certbot-external-auth:out-public-ip-logging-ok \
         -d "stoke2.pki.enigmabridge.com" \
         -d "st2.pki.enigmabridge.com" \
