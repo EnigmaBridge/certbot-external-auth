@@ -386,7 +386,7 @@ s.serve_forever()" """
             port=port)
 
         json_data = OrderedDict()
-        json_data['cmd'] = 'perform'
+        json_data['cmd'] = 'perform_challenge'
         json_data['type'] = achall.chall.typ
         json_data['domain'] = achall.domain
         json_data['token'] = b64.b64encode(achall.chall.token)
@@ -449,7 +449,7 @@ s.serve_forever()" """
         response, validation = achall.response_and_validation()
 
         json_data = OrderedDict()
-        json_data['cmd'] = 'perform'
+        json_data['cmd'] = 'perform_challenge'
         json_data['type'] = achall.chall.typ
         json_data['domain'] = achall.domain
         json_data['token'] = b64.b64encode(achall.chall.token)
@@ -494,7 +494,7 @@ s.serve_forever()" """
         response = tls_help._setup_challenge_cert(achall)
 
         json_data = OrderedDict()
-        json_data['cmd'] = 'perform'
+        json_data['cmd'] = 'perform_challenge'
         json_data['type'] = achall.chall.typ
         json_data['domain'] = achall.domain
         json_data['token'] = b64.b64encode(achall.chall.token)
