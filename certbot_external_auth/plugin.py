@@ -658,7 +658,7 @@ s.serve_forever()" """
                     args.append(kwargs.get(FIELD_TIMESTAMP))
 
             else:
-                raise errors.PluginError('Unknown command for handler script')
+                logger.info("Dehydrated does not suport this call")
 
         proc = subprocess.Popen([self._get_handler(), command] + list(args),
                                 stdout=subprocess.PIPE,
