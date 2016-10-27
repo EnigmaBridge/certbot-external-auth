@@ -284,13 +284,11 @@ s.serve_forever()" """
         for achall in achalls:
             cur_record = self._get_cleanup_json(achall)
 
-            if self._is_json_mode():
+            if self._is_json_mode() or self._is_handler_mode():
                 self._json_out(cur_record, True)
 
-            if self._is_handler_mode():
-                self._json_out(cur_record, True)
-                if self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
-                    raise errors.PluginError("cleanup handler failed")
+            if self._is_handler_mode() and self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
+                raise errors.PluginError("cleanup handler failed")
 
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
