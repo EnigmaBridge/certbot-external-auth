@@ -33,6 +33,7 @@ from certbot import reverter
 from certbot.plugins import common
 from certbot.display import util as display_util, ops as display_ops
 
+from certbot_external_auth import *
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +251,7 @@ s.serve_forever()" """
                 messages.append(cur_message)
 
         data = OrderedDict()
-        data['cmd'] = 'report'
+        data[FIELD_CMD] = COMMAND_REPORT
         data['messages'] = messages
         self._json_out(data, True)
         pass
@@ -307,8 +308,8 @@ s.serve_forever()" """
         response, validation = achall.response_and_validation()
 
         cur_record = OrderedDict()
-        cur_record['cmd'] = 'cleanup'
-        cur_record['type'] = achall.chall.typ
+        cur_record[FIELD_CMD] = COMMAND_CLEANUP
+        cur_record[FIELD_TYPE] = achall.chall.typ
 
         if isinstance(achall.chall, challenges.HTTP01):
             pass
@@ -317,31 +318,31 @@ s.serve_forever()" """
         elif isinstance(achall.chall, challenges.TLSSNI01):
             pass
 
-        cur_record['status'] = None
-        cur_record['domain'] = achall.domain
-        cur_record['token'] = b64.b64encode(achall.chall.token)
-        cur_record['validation'] = validation if isinstance(validation, types.StringTypes) else ''
-        cur_record['key_auth'] = response.key_authorization
-        cur_record['validated'] = None
-        cur_record['error'] = None
+        cur_record[FIELD_STATUS] = None
+        cur_record[FIELD_DOMAIN] = achall.domain
+        cur_record[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
+        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, types.StringTypes) else ''
+        cur_record[FIELD_KEY_AUTH] = response.key_authorization
+        cur_record[FIELD_VALIDATED] = None
+        cur_record[FIELD_ERROR] = None
 
         if achall.status is not None:
             try:
-                cur_record['status'] = achall.status.name
+                cur_record[FIELD_STATUS] = achall.status.name
             except:
                 pass
 
         if achall.error is not None:
             try:
-                cur_record['error'] = str(achall.error)
+                cur_record[FIELD_ERROR] = str(achall.error)
             except:
-                cur_record['error'] = 'ERROR'
+                cur_record[FIELD_ERROR] = 'ERROR'
 
         if achall.validated is not None:
             try:
-                cur_record['validated'] = str(achall.validated)
+                cur_record[FIELD_VALIDATED] = str(achall.validated)
             except:
-                cur_record['validated'] = 'ERROR'
+                cur_record[FIELD_VALIDATED] = 'ERROR'
 
         return cur_record
 
@@ -386,14 +387,14 @@ s.serve_forever()" """
             port=port)
 
         json_data = OrderedDict()
-        json_data['cmd'] = 'perform_challenge'
-        json_data['type'] = achall.chall.typ
-        json_data['domain'] = achall.domain
-        json_data['token'] = b64.b64encode(achall.chall.token)
-        json_data['validation'] = validation
-        json_data['uri'] = achall.chall.uri(achall.domain)
+        json_data[FIELD_CMD] = COMMAND_PERFORM
+        json_data[FIELD_TYPE] = achall.chall.typ
+        json_data[FIELD_DOMAIN] = achall.domain
+        json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
+        json_data[FIELD_VALIDATION] = validation
+        json_data[FIELD_URI] = achall.chall.uri(achall.domain)
         json_data['command'] = command
-        json_data['key_auth'] = response.key_authorization
+        json_data[FIELD_KEY_AUTH] = response.key_authorization
 
         if self.conf("test-mode"):
             logger.debug("Test mode. Executing the manual command: %s", command)
@@ -449,20 +450,20 @@ s.serve_forever()" """
         response, validation = achall.response_and_validation()
 
         json_data = OrderedDict()
-        json_data['cmd'] = 'perform_challenge'
-        json_data['type'] = achall.chall.typ
-        json_data['domain'] = achall.domain
-        json_data['token'] = b64.b64encode(achall.chall.token)
-        json_data['validation'] = validation
+        json_data[FIELD_CMD] = COMMAND_PERFORM
+        json_data[FIELD_TYPE] = achall.chall.typ
+        json_data[FIELD_DOMAIN] = achall.domain
+        json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
+        json_data[FIELD_VALIDATION] = validation
         json_data['txt_domain'] = achall.validation_domain_name(achall.domain)
-        json_data['key_auth'] = response.key_authorization
+        json_data[FIELD_KEY_AUTH] = response.key_authorization
 
         if not self.conf("test-mode"):
             if self._is_text_mode():
                 self._notify_and_wait(
                     self._get_message(achall).format(
-                        validation=json_data['validation'],
-                        domain=json_data['domain'],
+                        validation=json_data[FIELD_VALIDATION],
+                        domain=json_data[FIELD_DOMAIN],
                         response=response))
 
             elif self._is_json_mode():
@@ -494,37 +495,37 @@ s.serve_forever()" """
         response = tls_help._setup_challenge_cert(achall)
 
         json_data = OrderedDict()
-        json_data['cmd'] = 'perform_challenge'
-        json_data['type'] = achall.chall.typ
-        json_data['domain'] = achall.domain
-        json_data['token'] = b64.b64encode(achall.chall.token)
-        json_data['z_domain'] = achall.response(achall.account_key).z_domain
-        json_data['validation'] = json_data['z_domain']
-        json_data['cert_path'] = tls_help.get_cert_path(achall)
-        json_data['key_path'] = tls_help.get_key_path(achall)
-        json_data['port'] = str(self.config.tls_sni_01_port)
-        json_data['key_auth'] = response.key_authorization
-        json_data['cert_pem'] = None
-        json_data['key_pem'] = None
+        json_data[FIELD_CMD] = COMMAND_PERFORM
+        json_data[FIELD_TYPE] = achall.chall.typ
+        json_data[FIELD_DOMAIN] = achall.domain
+        json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
+        json_data[FIELD_Z_DOMAIN] = achall.response(achall.account_key).z_domain
+        json_data[FIELD_VALIDATION] = json_data[FIELD_Z_DOMAIN]
+        json_data[FIELD_CERT_PATH] = tls_help.get_cert_path(achall)
+        json_data[FIELD_KEY_PATH] = tls_help.get_key_path(achall)
+        json_data[FIELD_PORT] = str(self.config.tls_sni_01_port)
+        json_data[FIELD_KEY_AUTH] = response.key_authorization
+        json_data[FIELD_CERT_PEM] = None
+        json_data[FIELD_KEY_PEM] = None
         try:
-            with open(json_data['cert_path'], 'r') as fh:
-                json_data['cert_pem'] = fh.read()
+            with open(json_data[FIELD_CERT_PATH], 'r') as fh:
+                json_data[FIELD_CERT_PEM] = fh.read()
         except:
             pass
         try:
-            with open(json_data['key_path'], 'r') as fh:
-                json_data['key_pem'] = fh.read()
+            with open(json_data[FIELD_KEY_PATH], 'r') as fh:
+                json_data[FIELD_KEY_PEM] = fh.read()
         except:
             pass
 
         if self._is_text_mode():
             self._notify_and_wait(
                 self._get_message(achall).format(
-                    domain = json_data['domain'],
-                    z_domain = json_data['z_domain'],
-                    cert_path = json_data['cert_path'],
-                    key_path = json_data['key_path'],
-                    port = json_data['port']))
+                    domain = json_data[FIELD_DOMAIN],
+                    z_domain = json_data[FIELD_Z_DOMAIN],
+                    cert_path = json_data[FIELD_CERT_PATH],
+                    key_path = json_data[FIELD_KEY_PATH],
+                    port = json_data[FIELD_PORT]))
 
         elif self._is_json_mode():
             self._json_out_and_wait(json_data)
@@ -572,19 +573,19 @@ s.serve_forever()" """
 
     def deploy_cert(self, domain, cert_path, key_path, chain_path, fullchain_path):
         cur_record = OrderedDict()
-        cur_record['cmd'] = 'deploy_cert'
-        cur_record['domain'] = domain
-        cur_record['cert_path'] = cert_path
-        cur_record['key_path'] = key_path
-        cur_record['chain_path'] = chain_path
-        cur_record['fullchain_path'] = fullchain_path
-        cur_record['timestamp'] = self._start_time
-        cur_record['cert_timestamp'] = self._get_file_mtime(cert_path)
+        cur_record[FIELD_CMD] = COMMAND_DEPLOY_CERT
+        cur_record[FIELD_DOMAIN] = domain
+        cur_record[FIELD_CERT_PATH] = cert_path
+        cur_record[FIELD_KEY_PATH] = key_path
+        cur_record[FIELD_CHAIN_PATH] = chain_path
+        cur_record[FIELD_FULLCHAIN_PATH] = fullchain_path
+        cur_record[FIELD_TIMESTAMP] = self._start_time
+        cur_record[FIELD_CERT_TIMESTAMP] = self._get_file_mtime(cert_path)
 
         if self._is_json_mode() or self._is_handler_mode():
             self._json_out(cur_record, True)
 
-        hook_cmd = "deploy_cert" if cur_record['cert_timestamp'] >= cur_record['timestamp'] else 'unchanged_cert'
+        hook_cmd = "deploy_cert" if cur_record[FIELD_CERT_TIMESTAMP] >= cur_record[FIELD_TIMESTAMP] else 'unchanged_cert'
         if self._is_handler_mode() and self._call_handler(hook_cmd, **(self._get_json_to_kwargs(cur_record))) is None:
             raise errors.PluginError("cleanup handler failed")
         pass
@@ -600,7 +601,7 @@ s.serve_forever()" """
 
     def save(self, title=None, temporary=False):
         cur_record = OrderedDict()
-        cur_record['cmd'] = 'save'
+        cur_record[FIELD_CMD] = COMMAND_SAVE
         cur_record['title'] = title
         cur_record['temporary'] = temporary
         if self._is_json_mode() or self._is_handler_mode():
@@ -620,7 +621,7 @@ s.serve_forever()" """
 
     def restart(self):
         cur_record = OrderedDict()
-        cur_record['cmd'] = 'restart'
+        cur_record[FIELD_CMD] = COMMAND_RESTART
         if self._is_json_mode() or self._is_handler_mode():
             self._json_out(cur_record, True)
 
@@ -646,15 +647,15 @@ s.serve_forever()" """
 
             if command in auth_cmd_map:
                 command = auth_cmd_map[command]
-                args = list(args) + [kwargs.get('domain'), kwargs.get('token'), kwargs.get('validation')]
+                args = list(args) + [kwargs.get(FIELD_DOMAIN), kwargs.get(FIELD_TOKEN), kwargs.get(FIELD_VALIDATION)]
 
             elif command in install_cmd_map:
                 command = install_cmd_map[command]
-                args = list(args) + [kwargs.get('domain'), kwargs.get('key_path'), kwargs.get('cert_path'),
-                                     kwargs.get('fullchain_path'), kwargs.get('chain_path')]
+                args = list(args) + [kwargs.get(FIELD_DOMAIN), kwargs.get(FIELD_KEY_PATH), kwargs.get(FIELD_CERT_PATH),
+                                     kwargs.get(FIELD_FULLCHAIN_PATH), kwargs.get(FIELD_CHAIN_PATH)]
 
                 if command == 'deploy_cert':
-                    args.append(kwargs.get('timestamp'))
+                    args.append(kwargs.get(FIELD_TIMESTAMP))
 
             else:
                 raise errors.PluginError('Unknown command for handler script')
