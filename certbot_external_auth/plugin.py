@@ -386,9 +386,9 @@ s.serve_forever()" """
         json_data = OrderedDict()
         json_data['cmd'] = 'perform'
         json_data['type'] = achall.chall.typ
-        json_data['validation'] = validation
         json_data['domain'] = achall.domain
         json_data['token'] = b64.b64encode(achall.chall.token)
+        json_data['validation'] = validation
         json_data['uri'] = achall.chall.uri(achall.domain)
         json_data['command'] = command
         json_data['key_auth'] = response.key_authorization
@@ -449,9 +449,9 @@ s.serve_forever()" """
         json_data = OrderedDict()
         json_data['cmd'] = 'perform'
         json_data['type'] = achall.chall.typ
-        json_data['validation'] = validation
         json_data['domain'] = achall.domain
         json_data['token'] = b64.b64encode(achall.chall.token)
+        json_data['validation'] = validation
         json_data['txt_domain'] = achall.validation_domain_name(achall.domain)
         json_data['key_auth'] = response.key_authorization
 
@@ -497,6 +497,7 @@ s.serve_forever()" """
         json_data['domain'] = achall.domain
         json_data['token'] = b64.b64encode(achall.chall.token)
         json_data['z_domain'] = achall.response(achall.account_key).z_domain
+        json_data['validation'] = json_data['z_domain']
         json_data['cert_path'] = tls_help.get_cert_path(achall)
         json_data['key_path'] = tls_help.get_key_path(achall)
         json_data['port'] = str(self.config.tls_sni_01_port)
