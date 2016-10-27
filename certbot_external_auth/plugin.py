@@ -166,6 +166,8 @@ s.serve_forever()" """
         # Non-interactive not yet supported
         if self.config.noninteractive_mode and not self.conf("test-mode"):
             raise errors.PluginError("Running manual mode non-interactively is not supported (yet)")
+        if not self._is_handler_mode() and self._is_dehydrated_dns():
+            raise errors.PluginError("dehydrated-dns switch is allowed only with handler")
 
     def more_info(self):  # pylint: disable=missing-docstring,no-self-use
         return ("This plugin requires user's manual intervention in setting "
