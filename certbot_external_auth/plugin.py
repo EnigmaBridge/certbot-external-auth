@@ -305,8 +305,8 @@ s.serve_forever()" """
             pass
 
         cur_record['status'] = None
-        cur_record['token'] = b64.b64encode(achall.chall.token)
         cur_record['domain'] = achall.domain
+        cur_record['token'] = b64.b64encode(achall.chall.token)
         cur_record['validated'] = None
         cur_record['error'] = None
 
@@ -370,6 +370,8 @@ s.serve_forever()" """
         json_data['cmd'] = 'validate'
         json_data['type'] = achall.chall.typ
         json_data['validation'] = validation
+        json_data['domain'] = achall.domain
+        json_data['token'] = b64.b64encode(achall.chall.token)
         json_data['uri'] = achall.chall.uri(achall.domain)
         json_data['command'] = command
         json_data['key_auth'] = response.key_authorization
@@ -431,7 +433,9 @@ s.serve_forever()" """
         json_data['cmd'] = 'validate'
         json_data['type'] = achall.chall.typ
         json_data['validation'] = validation
-        json_data['domain'] = achall.validation_domain_name(achall.domain)
+        json_data['domain'] = achall.domain
+        json_data['token'] = b64.b64encode(achall.chall.token)
+        json_data['txt_domain'] = achall.validation_domain_name(achall.domain)
         json_data['key_auth'] = response.key_authorization
 
         if not self.conf("test-mode"):
@@ -474,6 +478,7 @@ s.serve_forever()" """
         json_data['cmd'] = 'validate'
         json_data['type'] = achall.chall.typ
         json_data['domain'] = achall.domain
+        json_data['token'] = b64.b64encode(achall.chall.token)
         json_data['z_domain'] = achall.response(achall.account_key).z_domain
         json_data['cert_path'] = tls_help.get_cert_path(achall)
         json_data['key_path'] = tls_help.get_key_path(achall)
