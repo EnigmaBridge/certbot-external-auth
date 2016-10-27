@@ -50,7 +50,7 @@ class AuthenticatorOut(common.Plugin):
     Script is also based on https://github.com/marcan/certbot-external
 
     """
-    hidden = False
+    hidden = True
 
     description = "Manual challenge solver"
 
