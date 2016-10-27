@@ -523,6 +523,7 @@ Failed authorization procedure. st2.pki.enigmabridge.com (tls-sni-01): urn:acme:
 
 ## Future work
 
+* Add compatibility with [Dehydrated] DNS hooks
 * Communicate challenges via named pipes
 * Communicate challenges via sockets
 
@@ -548,4 +549,4 @@ Once ticket [2782] is resolved this won't be needed.
 [certbot-external]: https://github.com/marcan/certbot-external
 [2782]: https://github.com/certbot/certbot/issues/2782
 [handler-example.sh]: https://github.com/EnigmaBridge/certbot-external-auth/blob/master/handler-example.sh
-
+[Dehydrated]: https://github.com/lukas2511/dehydrated
