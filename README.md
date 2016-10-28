@@ -4,7 +4,7 @@ Automation - the main goal of letsencrypt is to make certificate management hass
 
 The biggest hassle with letsencrypt is verification of domain control as it requires your server to talk to letsencrypt servers and respond to challenges provided (changing DNS records, or adding files to certain locations). This process is necessary is it prevents random people getting certificates for your own domain. This plugin helps with domain verification process. It offers three modes:
 
-1. JSON mode - its output is in JSON format that can be passed on to certbot that can print it out.
+1. JSON mode - its output is in JSON format that can be processed by the certbot caller (e.g., Ansible).
 2. Handler mode - when it provides data for external authentication programs - e.g., [Dehydrated] that supports DNS updates for a number of registrars - here is the [list].
 3. Manual mode - a fallback option when no automation is available and users have to do some changes (e.g., DNS updates) by hand.
 
