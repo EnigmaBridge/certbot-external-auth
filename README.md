@@ -1,12 +1,20 @@
 ## External authenticator for Certbot
 
-This plugin helps with domain validation process either by calling an external 
-program or by printing JSON challenge to stdout for invoker to solve. 
-Handler is compatible with [Dehydrated] DNS hooks.
+Automation - the main goal of letsencrypt is to make certificate management hassle-free. It works like that in most situations but each user has to deal with its own network configuration (NAT, firewalls, DNS, proxy, ...). The more mechanisms we have for verifying domain control, the easier the letsencrypt use becomes. 
 
-Supported challenges: _DNS-01_, _HTTP-01_, _TLS-SNI-01_
+The biggest hassle with letsencrypt is verification of domain control as it requires your server to talk to letsencrypt servers and respond to challenges provided (changing DNS records, or adding files to certain locations). This process is necessary is it prevents random people getting certificates for your own domain. This plugin helps with domain verification process. It offers three modes:
 
-This plugin supports manual authentication and installation.
+1. JSON mode - its output is in JSON format that can be passed on to certbot that can print it out.
+2. Handler mode - when it provides data for external authentication programs - e.g., Dehydrated that supports DNS updates for a number of registrars.
+3. Manual mode - a fallback option when no automation is available and users have to do some changes (e.g., DNS updates) by hand.
+
+We also support challenges for all three verification protocols:
+
+* DNS 
+* HTTP
+* TLS-SNI
+
+This plugin does not communicate with letsencrypt but it provides data for letsencrypt clients in the correct format so the domain control verification can be automated.
 
 ## Installation - pip
 
@@ -17,7 +25,7 @@ pip install certbot-external-auth
 
 ## Usage
 
-To use, try something like this:
+Here is an example of a typical use:
 
 ```bash
 certbot --text --agree-tos --email you@example.com \
@@ -48,8 +56,8 @@ on the STDOUT.
 After the challenge is processed, the invoker is supposed
 to send a new line `\n` character to the STDIN to continue with the process.
 
-Note JSON mode produces also another JSON objects besides challenges, 
-e.g., cleanup and reports. The `\n` is expected only for challenges (perform/validate step).
+*Note JSON mode produces also another JSON objects besides challenges, 
+e.g., cleanup and reports. The `\n` is expected only for challenges (perform/validate step).*
 
 If plugin is installed also as an Installer (or Configurator), it provides also 
 commands related to the certificate installation.
@@ -75,9 +83,11 @@ Reporter was substituted to produce JSON logs so STDOUT is JSON only.
         with dehydrated-dns hooks is enabled
 ```
 
+##Errors
+
+Processing errors are indicated by non-zero return codes returned by this plugin.
+
 ## Examples
-In the examples below I did not solve the challenges so the reporter prints 
-out an error. The error is indicated also by returning non-zero return code.
 
 The particular examples for verification methods and handler follows.
 
