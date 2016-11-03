@@ -197,13 +197,13 @@ s.serve_forever()" """
         # and prompt only once per server (one "echo -n" per domain)
 
         if self._is_classic_handler_mode() and self._call_handler("pre-perform") is None:
-            raise errors.PluginError("Error in calling handler to do the pre-perform (challenge) stage")
+            raise errors.PluginError("Error in calling the handler to do the pre-perform (challenge) stage")
 
         for achall in achalls:
             responses.append(mapping[achall.typ](achall))
 
         if self._is_classic_handler_mode() and self._call_handler("post-perform") is None:
-            raise errors.PluginError("Error in calling handler to do the post-perform (challenge) stage")
+            raise errors.PluginError("Error in calling the handler to do the post-perform (challenge) stage")
 
         return responses
 
@@ -287,7 +287,7 @@ s.serve_forever()" """
         # pylint: disable=missing-docstring
 
         if self._is_classic_handler_mode() and self._call_handler("pre-cleanup") is None:
-            raise errors.PluginError("Error in calling handler to do the pre-cleanup stage")
+            raise errors.PluginError("Error in calling the handler to do the pre-cleanup stage")
 
         for achall in achalls:
             cur_record = self._get_cleanup_json(achall)
@@ -296,13 +296,13 @@ s.serve_forever()" """
                 self._json_out(cur_record, True)
 
             if self._is_handler_mode() and self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
-                raise errors.PluginError("Error in calling handler to do the cleanup stage")
+                raise errors.PluginError("Error in calling the handler to do the cleanup stage")
 
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
 
         if self._is_classic_handler_mode() and self._call_handler("post-cleanup") is None:
-            raise errors.PluginError("Error in calling handler to do the post-cleanup stage")
+            raise errors.PluginError("Error in calling the handler to do the post-cleanup stage")
 
     def _get_cleanup_json(self, achall):
         response, validation = achall.response_and_validation()
@@ -434,7 +434,7 @@ s.serve_forever()" """
             elif self._is_handler_mode():
                 self._json_out(json_data, True)
                 if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                    raise errors.PluginError("Error in calling handler to do the perform (challenge) stage")
+                    raise errors.PluginError("Error in calling the handler to do the perform (challenge) stage")
 
             else:
                 raise errors.PluginError("Unknown plugin mode selected")
@@ -472,7 +472,7 @@ s.serve_forever()" """
             elif self._is_handler_mode():
                 self._json_out(json_data, True)
                 if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                    raise errors.PluginError("Error in calling handler to do the perform (challenge) stage")
+                    raise errors.PluginError("Error in calling the handler to do the perform (challenge) stage")
 
             else:
                 raise errors.PluginError("Unknown plugin mode selected")
@@ -533,7 +533,7 @@ s.serve_forever()" """
         elif self._is_handler_mode():
             self._json_out(json_data, True)
             if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                raise errors.PluginError("Error in calling handler to do the perform (challenge) stage")
+                raise errors.PluginError("Error in calling the handler to do the perform (challenge) stage")
 
         else:
             raise errors.PluginError("Unknown plugin mode selected")
@@ -587,7 +587,7 @@ s.serve_forever()" """
 
         hook_cmd = "deploy_cert" if cur_record[FIELD_CERT_TIMESTAMP] >= cur_record[FIELD_TIMESTAMP] else 'unchanged_cert'
         if self._is_handler_mode() and self._call_handler(hook_cmd, **(self._get_json_to_kwargs(cur_record))) is None:
-            raise errors.PluginError("Error in calling handler to do the deploy_cert stage")
+            raise errors.PluginError("Error in calling the handler to do the deploy_cert stage")
         pass
 
     def enhance(self, domain, enhancement, options=None):
