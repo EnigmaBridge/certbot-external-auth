@@ -672,9 +672,14 @@ s.serve_forever()" """
         arg_list = [self._get_handler(), command] + list(args)
 
         # Check if the handler exists
-        if not os.path.exists(self._get_handler()):
-            logger.error("Handler script `%s` not found" % self._get_handler())
+        if not os.path.isfile(self._get_handler()):
             self._handler_file_problem = True
+            logger.error("Handler script file `%s` not found. Absolute path: %s"
+                         % (self._get_handler(), self._try_get_abs_path(self._get_handler())))
+
+            if os.path.exists(self._get_handler()):
+                logger.error("Handler script `%s` is not a file" % self._get_handler())
+
             return None
 
         # Check if is executable
@@ -721,7 +726,10 @@ s.serve_forever()" """
 
     def _is_file_executable(self, fpath):
         if os.name.lower() == 'posix':
-            return os.access(fpath, os.X_OK)
+            try:
+                return os.access(fpath, os.X_OK)
+            except:
+                return False
         else:
             return True
 
