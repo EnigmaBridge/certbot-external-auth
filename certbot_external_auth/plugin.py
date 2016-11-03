@@ -658,30 +658,69 @@ s.serve_forever()" """
                     args.append(kwargs.get(FIELD_TIMESTAMP))
 
             else:
-                logger.info("Dehydrated does not suport this call")
+                logger.info("Dehydrated mode does not support this handler command: %s" % command)
 
-        proc = subprocess.Popen([self._get_handler(), command] + list(args),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                env=env)
-        stdout, stderr = proc.communicate()
+        proc = None
+        stdout, stderr = None, None
+        arg_list = [self._get_handler(), command] + list(args)
 
-        if proc.returncode != 0:
-            if stdout.strip() == "NotImplemented":
-                logger.warning("Handler script does not implement %s\n%s",
-                               command, stderr)
-                return NotImplemented
+        # Check if the handler exists
+        if not os.path.exists(self._get_handler()):
+            logger.error("Handler script `%s` not found" % self._get_handler())
+            return None
+
+        # Check if is executable
+        # Still try to run, throw an exception only if problem really did occur.
+        exec_problem = not self._is_file_executable(self._get_handler())
+
+        # The handler invocation
+        try:
+            proc = subprocess.Popen(arg_list,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    env=env)
+            stdout, stderr = proc.communicate()
+
+            # Handler processing
+            if proc.returncode != 0:
+                if stdout.strip() == "NotImplemented":
+                    logger.warning("Handler script does not implement the command %s\n  Stderr: %s",
+                                   command, stderr)
+                    return NotImplemented
+
+                else:
+                    logger.error("Handler script failed!\n - Stdout: %s\n - Stderr: %s", stdout, stderr)
+                    return None
+
             else:
-                logger.error("Handler script failed!\n%s\n%s", stdout, stderr)
-                return None
-        else:
-                logger.info("Handler output (%s):\n%s\n%s",
-                               command, stdout, stderr)
-        return stdout
+                    logger.info("Handler output (%s):\n - Stdout: %s\n - Stderr: %s",
+                                command, stdout, stderr)
+            return stdout
+
+        except Exception as e:
+            logger.error("Handler script invocation failed with an exception. \n - Script: %s\n - Exception: %s"
+                         % (' '.join(arg_list), e))
+            if exec_problem:
+                logger.error("Handler script %s does not have the executable flag set so it cannot be executed. "
+                             "\n - Try running: chmod +x \"%s\" " % (self._get_handler(), self._try_get_abs_path(self._get_handler())))
+            else:
+                logger.warning("Make sure the handler file exists and is executable (+x permission on a Posix system)")
 
     #
     # Helper methods & UI
     #
+
+    def _is_file_executable(self, fpath):
+        if os.name.lower() == 'posix':
+            return os.access(fpath, os.X_OK)
+        else:
+            return True
+
+    def _try_get_abs_path(self, fpath):
+        try:
+            return os.path.abspath(fpath)
+        except:
+            return fpath
 
     def _get_file_mtime(self, file):
         return os.path.getmtime(file)
