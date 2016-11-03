@@ -168,7 +168,7 @@ s.serve_forever()" """
         if self.config.noninteractive_mode and not self.conf("test-mode"):
             raise errors.PluginError("Running manual mode non-interactively is not supported (yet)")
         if not self._is_handler_mode() and self._is_dehydrated_dns():
-            raise errors.PluginError("dehydrated-dns switch is allowed only with handler")
+            raise errors.PluginError("dehydrated-dns switch is allowed only with handler specified")
 
     def more_info(self):  # pylint: disable=missing-docstring,no-self-use
         return ("This plugin requires user's manual intervention in setting "
@@ -197,13 +197,13 @@ s.serve_forever()" """
         # and prompt only once per server (one "echo -n" per domain)
 
         if self._is_classic_handler_mode() and self._call_handler("pre-perform") is None:
-            raise errors.PluginError("pre-perform handler failed")
+            raise errors.PluginError("Error in calling handler to do the pre-perform (challenge) stage")
 
         for achall in achalls:
             responses.append(mapping[achall.typ](achall))
 
         if self._is_classic_handler_mode() and self._call_handler("post-perform") is None:
-            raise errors.PluginError("post-perform handler failed")
+            raise errors.PluginError("Error in calling handler to do the post-perform (challenge) stage")
 
         return responses
 
@@ -287,7 +287,7 @@ s.serve_forever()" """
         # pylint: disable=missing-docstring
 
         if self._is_classic_handler_mode() and self._call_handler("pre-cleanup") is None:
-            raise errors.PluginError("pre-cleanup handler failed")
+            raise errors.PluginError("Error in calling handler to do the pre-cleanup stage")
 
         for achall in achalls:
             cur_record = self._get_cleanup_json(achall)
@@ -296,13 +296,13 @@ s.serve_forever()" """
                 self._json_out(cur_record, True)
 
             if self._is_handler_mode() and self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
-                raise errors.PluginError("cleanup handler failed")
+                raise errors.PluginError("Error in calling handler to do the cleanup stage")
 
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
 
         if self._is_classic_handler_mode() and self._call_handler("post-cleanup") is None:
-            raise errors.PluginError("post-cleanup handler failed")
+            raise errors.PluginError("Error in calling handler to do the post-cleanup stage")
 
     def _get_cleanup_json(self, achall):
         response, validation = achall.response_and_validation()
@@ -434,10 +434,10 @@ s.serve_forever()" """
             elif self._is_handler_mode():
                 self._json_out(json_data, True)
                 if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                    raise errors.PluginError("pre-perform handler failed")
+                    raise errors.PluginError("Error in calling handler to do the perform (challenge) stage")
 
             else:
-                raise errors.PluginError("Unknown mode selected")
+                raise errors.PluginError("Unknown plugin mode selected")
 
         if not response.simple_verify(
                 achall.chall, achall.domain,
@@ -472,10 +472,10 @@ s.serve_forever()" """
             elif self._is_handler_mode():
                 self._json_out(json_data, True)
                 if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                    raise errors.PluginError("pre-perform handler failed")
+                    raise errors.PluginError("Error in calling handler to do the perform (challenge) stage")
 
             else:
-                raise errors.PluginError("Unknown mode selected")
+                raise errors.PluginError("Unknown plugin mode selected")
 
         try:
             verification_status = response.simple_verify(
@@ -533,10 +533,10 @@ s.serve_forever()" """
         elif self._is_handler_mode():
             self._json_out(json_data, True)
             if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                raise errors.PluginError("pre-perform handler failed")
+                raise errors.PluginError("Error in calling handler to do the perform (challenge) stage")
 
         else:
-            raise errors.PluginError("Unknown mode selected")
+            raise errors.PluginError("Unknown plugin mode selected")
 
         if not response.simple_verify(
                 achall.chall, achall.domain,
@@ -587,7 +587,7 @@ s.serve_forever()" """
 
         hook_cmd = "deploy_cert" if cur_record[FIELD_CERT_TIMESTAMP] >= cur_record[FIELD_TIMESTAMP] else 'unchanged_cert'
         if self._is_handler_mode() and self._call_handler(hook_cmd, **(self._get_json_to_kwargs(cur_record))) is None:
-            raise errors.PluginError("cleanup handler failed")
+            raise errors.PluginError("Error in calling handler to do the deploy_cert stage")
         pass
 
     def enhance(self, domain, enhancement, options=None):
@@ -733,13 +733,13 @@ s.serve_forever()" """
             return
 
         if self.config.noninteractive_mode or (self._is_json_mode() and not self.conf("public-ip-logging-ok")):
-            raise errors.PluginError("Must agree to IP logging to proceed")
+            raise errors.PluginError("Must agree to the public IP logging to proceed")
 
         if not (self.conf("test-mode") or self.conf("public-ip-logging-ok")):
             if not zope.component.getUtility(interfaces.IDisplay).yesno(
                     self.IP_DISCLAIMER, "Yes", "No",
                     cli_flag="--certbot-external-auth:out-public-ip-logging-ok"):
-                raise errors.PluginError("Must agree to IP logging to proceed")
+                raise errors.PluginError("Must agree to the public IP logging to proceed")
 
             else:
                 self.config.namespace.certbot_external_auth_out_public_ip_logging_ok = True
