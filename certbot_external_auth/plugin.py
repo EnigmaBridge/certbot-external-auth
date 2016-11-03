@@ -697,16 +697,16 @@ s.serve_forever()" """
             # Handler processing
             if proc.returncode != 0:
                 if stdout.strip() == "NotImplemented":
-                    logger.warning("Handler script does not implement the command %s\n  Stderr: %s",
+                    logger.warning("Handler script does not implement the command %s\n - Stderr: \n%s",
                                    command, stderr)
                     return NotImplemented
 
                 else:
-                    logger.error("Handler script failed!\n - Stdout: %s\n - Stderr: %s", stdout, stderr)
+                    logger.error("Handler script failed!\n - Stdout: \n%s\n - Stderr: \n%s", stdout, stderr)
                     return None
 
             else:
-                    logger.info("Handler output (%s):\n - Stdout: %s\n - Stderr: %s",
+                    logger.info("Handler output (%s):\n - Stdout: \n%s\n - Stderr: \n%s",
                                 command, stdout, stderr)
             return stdout
 
@@ -715,7 +715,7 @@ s.serve_forever()" """
             logger.error("Handler script invocation failed with an exception. \n - Script: %s\n - Exception: %s"
                          % (' '.join(arg_list), e))
             if exec_problem:
-                logger.error("Handler script %s does not have the executable flag set so it cannot be executed. "
+                logger.error("Handler script %s does not have the executable permission set so it cannot be executed. "
                              "\n - Try running: chmod +x \"%s\" " % (self._get_handler(), self._try_get_abs_path(self._get_handler())))
             else:
                 logger.warning("Make sure the handler file exists and is executable (+x permission on a Posix system)")
