@@ -131,6 +131,7 @@ s.serve_forever()" """
                       else "/tmp/certbot")
         self._httpd = None
         self._start_time = calendar.timegm(time.gmtime())
+        self._handler_file_problem = False
 
         # Set up reverter
         self.reverter = reverter.Reverter(self.config)
@@ -286,7 +287,9 @@ s.serve_forever()" """
     def cleanup(self, achalls):
         # pylint: disable=missing-docstring
 
-        if self._is_classic_handler_mode() and self._call_handler("pre-cleanup") is None:
+        if self._is_classic_handler_mode() \
+                and not self._is_handler_broken() \
+                and self._call_handler("pre-cleanup") is None:
             raise errors.PluginError("Error in calling the handler to do the pre-cleanup stage")
 
         for achall in achalls:
@@ -295,13 +298,17 @@ s.serve_forever()" """
             if self._is_json_mode() or self._is_handler_mode():
                 self._json_out(cur_record, True)
 
-            if self._is_handler_mode() and self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
+            if self._is_handler_mode() \
+                    and not self._is_handler_broken() \
+                    and self._call_handler("cleanup", **(self._get_json_to_kwargs(cur_record))) is None:
                 raise errors.PluginError("Error in calling the handler to do the cleanup stage")
 
             if isinstance(achall.chall, challenges.HTTP01):
                 self._cleanup_http01_challenge(achall)
 
-        if self._is_classic_handler_mode() and self._call_handler("post-cleanup") is None:
+        if self._is_classic_handler_mode() \
+                and not self._is_handler_broken() \
+                and self._call_handler("post-cleanup") is None:
             raise errors.PluginError("Error in calling the handler to do the post-cleanup stage")
 
     def _get_cleanup_json(self, achall):
@@ -667,6 +674,7 @@ s.serve_forever()" """
         # Check if the handler exists
         if not os.path.exists(self._get_handler()):
             logger.error("Handler script `%s` not found" % self._get_handler())
+            self._handler_file_problem = True
             return None
 
         # Check if is executable
@@ -698,6 +706,7 @@ s.serve_forever()" """
             return stdout
 
         except Exception as e:
+            self._handler_file_problem = True
             logger.error("Handler script invocation failed with an exception. \n - Script: %s\n - Exception: %s"
                          % (' '.join(arg_list), e))
             if exec_problem:
@@ -733,6 +742,13 @@ s.serve_forever()" """
 
     def _is_handler_mode(self):
         return self.conf("handler") is not None
+
+    def _is_handler_broken(self):
+        """
+        Returns true if the handler file cannot be executed - exception was thrown
+        :return:
+        """
+        return self._handler_file_problem
 
     def _is_classic_handler_mode(self):
         """Handler mode && not dehydrated"""
