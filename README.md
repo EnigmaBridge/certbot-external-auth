@@ -90,6 +90,7 @@ Processing errors are indicated by non-zero return codes returned by this plugin
 ## Examples
 
 The particular examples for verification methods and handler follows.
+At first the JSON mode examples are given, then handler examples follow.
 
 ### DNS
 
@@ -221,7 +222,8 @@ The following section demonstrates usage of the plugin with [Dehydrated] DNS hoo
 
 Note the certbot is run with action `run` so deployment callbacks are called too.
 
-In this repository there is [dehydrated-example.sh] which is a hook stub used in this example.
+In this repository there is [dehydrated-example.sh] which is a hook stub used in this example. When using your own
+handler please make sure the file is executable (has `x` flag, `chmod +x handler-file`).
 
 
 ```bash
@@ -335,7 +337,8 @@ https://www.ssllabs.com/ssltest/analyze.html?d=bs3.pki.enigmabridge.com
 
 ### DNS
 
-In this repository there is a default [handler-example.sh] which can be used as a handler.
+In this repository there is a default [handler-example.sh] which can be used as a handler. When using your own
+handler please make sure the file is executable (has `x` flag, `chmod +x handler-file`).
 
 ```bash
 certbot --staging \
