@@ -1,7 +1,7 @@
 from setuptools import setup
 from setuptools import find_packages
 
-version = '0.0.6'
+version = '0.0.7'
 
 install_requires = [
     'acme',
@@ -15,7 +15,8 @@ setup(
     url='https://github.com/EnigmaBridge/certbot-external-auth',
     author="Dusan Klinec",
     author_email='dusan@enigmabridge.com',
-    license='Apache License 2.0',
+    license=open('LICENSE.txt').read(),
+    long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: System Administrators',
