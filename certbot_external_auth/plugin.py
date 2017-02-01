@@ -162,7 +162,7 @@ s.serve_forever()" """
 
         # Re-register displayer - stderr only displayer
         #displayer = display_util.NoninteractiveDisplay(sys.stderr)
-        displayer = display_util.FileDisplay(sys.stderr)
+        displayer = display_util.FileDisplay(sys.stderr, False)
         zope.component.provideUtility(displayer)
 
         # Non-interactive not yet supported
