@@ -8,4 +8,6 @@ python:
 install: 
  - "pip install certbot"
  - "pip install certbot-external-auth"
+script: 
+ - "setup.py install"
 
