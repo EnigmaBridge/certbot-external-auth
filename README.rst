@@ -121,6 +121,9 @@ Examples
 The particular examples for verification methods and handler follows. At
 first the JSON mode examples are given, then handler examples follow.
 
+Please note there is a ``--staging`` argument in the following commands, meaning you will get just testing LetsEncrypt certificate.
+Once this works for you, remove this argument so you get proper valid LetsEncrypt certificate.
+
 DNS
 ~~~
 
