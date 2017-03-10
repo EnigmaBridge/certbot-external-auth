@@ -107,11 +107,11 @@ Are you OK with your IP being logged?
     CMD_TEMPLATE = """\
 mkdir -p {root}/public_html/{achall.URI_ROOT_PATH}
 cd {root}/public_html
-printf "%s" {validation} > {achall.URI_ROOT_PATH}/{encoded_token}
+echo '{validation}' > {achall.URI_ROOT_PATH}/{encoded_token}
 # run only once per server:
 $(command -v python2 || command -v python2.7 || command -v python2.6) -c \\
 "import BaseHTTPServer, SimpleHTTPServer; \\
-s = BaseHTTPServer.HTTPServer(('', {port}), SimpleHTTPServer.SimpleHTTPRequestHandler); \\
+s = BaseHTTPServer.HTTPServer(('0.0.0.0', {port}), SimpleHTTPServer.SimpleHTTPRequestHandler); \\
 s.serve_forever()" """
     """Command template."""
 
