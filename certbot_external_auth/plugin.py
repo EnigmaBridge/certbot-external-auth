@@ -188,6 +188,11 @@ s.serve_forever()" """
         return [challenges.DNS01, challenges.HTTP01, challenges.TLSSNI01]
 
     def perform(self, achalls):
+        """
+        Performs the actual challenge resolving.
+        :param achalls:
+        :return:
+        """
         # pylint: disable=missing-docstring
         self._get_ip_logging_permission()
         mapping = {"http-01": self._perform_http01_challenge,
@@ -286,6 +291,11 @@ s.serve_forever()" """
                 sock.close()
 
     def cleanup(self, achalls):
+        """
+        Cleaning up challenges, called by AuthHandler
+        :param achalls:
+        :return:
+        """
         # pylint: disable=missing-docstring
 
         if self._is_classic_handler_mode() \
@@ -531,11 +541,11 @@ s.serve_forever()" """
         if self._is_text_mode():
             self._notify_and_wait(
                 self._get_message(achall).format(
-                    domain = json_data[FIELD_DOMAIN],
-                    z_domain = json_data[FIELD_Z_DOMAIN],
-                    cert_path = json_data[FIELD_CERT_PATH],
-                    key_path = json_data[FIELD_KEY_PATH],
-                    port = json_data[FIELD_PORT]))
+                    domain=json_data[FIELD_DOMAIN],
+                    z_domain=json_data[FIELD_Z_DOMAIN],
+                    cert_path=json_data[FIELD_CERT_PATH],
+                    key_path=json_data[FIELD_KEY_PATH],
+                    port=json_data[FIELD_PORT]))
 
         elif self._is_json_mode():
             self._json_out_and_wait(json_data)
@@ -782,13 +792,24 @@ s.serve_forever()" """
         return self._handler_file_problem
 
     def _is_classic_handler_mode(self):
-        """Handler mode && not dehydrated"""
+        """
+        Handler mode && not dehydrated
+        :return:
+        """
         return self._is_handler_mode() and not self._is_dehydrated_dns()
 
     def _get_handler(self):
+        """
+        Returns handler script path - from CLI argument
+        :return:
+        """
         return self.conf("handler")
 
     def _is_dehydrated_dns(self):
+        """
+        Returns true if dehydrated dns mode is used
+        :return:
+        """
         return self.conf("dehydrated-dns")
 
     def _json_out(self, data, new_line=False):
