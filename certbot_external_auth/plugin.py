@@ -29,6 +29,7 @@ from collections import OrderedDict
 import zope.component
 import zope.interface
 from acme import challenges
+from acme import messages
 from acme import errors as acme_errors
 
 try:
@@ -77,6 +78,7 @@ class AutoJSONEncoder(json.JSONEncoder):
 @zope.interface.implementer(interfaces.IInstaller)
 @zope.interface.provider(interfaces.IPluginFactory)
 @zope.interface.implementer(interfaces.IReporter)
+@zope.interface.implementer(interfaces.IChallengeProvider)
 class AuthenticatorOut(common.Plugin):
     """Manual Authenticator.
 
@@ -185,6 +187,10 @@ s.serve_forever()" """
             help="Handler program that takes the action. Data is transferred in ENV vars")
         add("dehydrated-dns", action="store_true",
             help="Switches handler mode to Dehydrated DNS compatible version")
+        add("from-session", default=None,
+            help="Resumes domain validation from the session file")
+        add("to-session", default=None,
+            help="Saves domain validation state to the session file so it can be resumed next time")
 
     def prepare(self):  # pylint: disable=missing-docstring,no-self-use
         # Re-register reporter - json only report
@@ -218,6 +224,76 @@ s.serve_forever()" """
         # pylint: disable=missing-docstring,no-self-use,unused-argument
         return [challenges.DNS01, challenges.HTTP01, challenges.TLSSNI01]
 
+    def request_domain_challenges(self, domain, acme=None, account=None):
+        """Returns challenges for particular domain.
+
+        Returns the same object as `acme.acme.client.request_domain_challenges()`
+
+        :param str domain: domain name to load challenges for
+        :param acme.client.Client acme: ACME client API.
+        :param `certbot.account.Account` account: Client's Account
+
+        :returns:
+
+        :raises errors.NoChallengeError: if challenge could not be resolved
+            and traditional load has to be used.
+
+        """
+        sessname = self.conf('from-session')
+        if sessname is None:
+            raise errors.NoChallengeError('No session file provided')
+
+        if not os.path.exists(sessname):
+            raise errors.PluginError('Session file not found %s' % sessname)
+
+        with open(sessname, 'r') as fh:
+            js = json.load(fh)
+            if 'domains' not in js:
+                raise errors.PluginError('Session file malformed, no domains key')
+
+            doms = js['domains']
+            if domain not in doms:
+                raise errors.NoChallengeError('Not found')
+
+            authzr = messages.AuthorizationResource.from_json(doms[domain])
+            return authzr
+
+    def on_domain_challenge_loaded(self, domain, challenge):
+        """Called when Certbot loads domain challenges from the ACME server.
+        Enables serialization of the challenges for the next Certbot invocation.
+
+        :param str domain: domain the challenge belongs to
+        :param `acme.AuthorizationResource` challenge: loaded challenge
+        :return:
+        """
+        sessname = self.conf('to-session')
+        if sessname is None:
+            return
+
+        data = None
+        if os.path.exists(sessname):
+            # noinspection PyBroadException
+            try:
+                with open(sessname, 'r') as fh:
+                    data = json.load(fh, object_pairs_hook=collections.OrderedDict)
+            except:
+                logger.info('Could not process session file %s, overwriting' % sessname)
+
+        if data is None:
+            data = OrderedDict()
+        if 'domains' not in data:
+            data['domains'] = {}
+
+        data['domains'][domain] = challenge.to_json()
+        logger.info('Domain %s challenge stored to %s' % (domain, sessname))
+
+        # Flush to session file
+        abs_filepath = os.path.abspath(sessname)
+        fw, tmp_filepath = util.unique_file(abs_filepath, mode='w', chmod=0o644)
+        with fw:
+            json.dump(data, fp=fw, indent=2)
+        shutil.move(tmp_filepath, abs_filepath)
+
     def perform(self, achalls):
         """
         Performs the actual challenge resolving.
@@ -242,6 +318,9 @@ s.serve_forever()" """
 
         if self._is_classic_handler_mode() and self._call_handler("post-perform") is None:
             raise errors.PluginError("Error in calling the handler to do the post-perform (challenge) stage")
+
+        if self._is_phase_one():
+            sys.exit(0)
 
         return responses
 
@@ -491,6 +570,9 @@ s.serve_forever()" """
             else:
                 raise errors.PluginError("Unknown plugin mode selected")
 
+        if self._should_skip_selftest():
+            return response
+
         if not response.simple_verify(
                 achall.chall, achall.domain,
                 achall.account_key.public_key(), self.config.http01_port):
@@ -530,6 +612,9 @@ s.serve_forever()" """
 
             else:
                 raise errors.PluginError("Unknown plugin mode selected")
+
+        if self._should_skip_selftest():
+            return response
 
         try:
             verification_status = response.simple_verify(
@@ -593,6 +678,9 @@ s.serve_forever()" """
 
         else:
             raise errors.PluginError("Unknown plugin mode selected")
+
+        if self._should_skip_selftest():
+            return response
 
         if not response.simple_verify(
                 achall.chall, achall.domain,
@@ -891,6 +979,41 @@ s.serve_forever()" """
         kwargs.setdefault('cls', AutoJSONEncoder)
         return json.dumps(data, **kwargs)
 
+    def _is_twophase(self):
+        """
+        Returns true if the current mode is two-phase with session files
+        :return:
+        """
+        return self.conf("from-session") is not None or self.conf("to-session") is not None
+
+    def _is_phase_one(self):
+        """
+        Returns true if in the first phase -> obtaining domain challenges
+        :return:
+        """
+        return self.conf("to-session") is not None
+
+    def _is_phase_two(self):
+        """
+        Returns true if in the second phase -> validating domain challenges
+        :return:
+        """
+        return self.conf("from-session") is not None
+
+    def _should_skip_waiting(self):
+        """
+        Returns true if waiting should be skipped
+        :return:
+        """
+        return self._is_phase_one() or self._is_phase_two()
+
+    def _should_skip_selftest(self):
+        """
+        Returns true if self-test of challenges should be skipped (e.g., http test for http challenge)
+        :return:
+        """
+        return self._is_phase_one()
+
     def _json_out(self, data, new_line=False):
         """
         Dumps data as JSON to the stdout
@@ -913,6 +1036,9 @@ s.serve_forever()" """
         """
         # pylint: disable=no-self-use
         self._json_out(data, True)
+        if self._should_skip_waiting():
+            return
+
         six.moves.input("")
 
     def _notify_and_wait(self, message):
@@ -923,6 +1049,9 @@ s.serve_forever()" """
         """
         # pylint: disable=no-self-use
         sys.stdout.write(message)
+        if self._should_skip_waiting():
+            return
+
         sys.stdout.write("Press ENTER to continue")
         sys.stdout.flush()
         six.moves.input("")
