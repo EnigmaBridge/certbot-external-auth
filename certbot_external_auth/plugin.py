@@ -460,10 +460,20 @@ s.serve_forever()" """
         json_data[FIELD_CMD] = COMMAND_PERFORM
         json_data[FIELD_TYPE] = achall.chall.typ
         json_data[FIELD_DOMAIN] = achall.domain
-        json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
+        json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token) # Py3 - This becomes a bytes obj. JSON can't decode that.
         json_data[FIELD_VALIDATION] = validation
         json_data[FIELD_TXT_DOMAIN] = achall.validation_domain_name(achall.domain)
         json_data[FIELD_KEY_AUTH] = response.key_authorization
+        for key, val in list(json_data.items()):
+            # Not highly effecient, would be neater to clean up FIELD_TOKEN.
+            # But if any of the others turn to bytes in the future, this will solve it:
+            if type(key) == bytes:
+                del json_data[key]
+                key = key.decode('UTF-8')
+                json_data[key] = val
+
+            if type(val) == bytes:
+                json_data[key] = val.decode('UTF-8')
 
         if not self.conf("test-mode"):
             if self._is_text_mode():
