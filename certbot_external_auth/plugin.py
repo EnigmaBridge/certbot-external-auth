@@ -22,6 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import datetime
 
 from collections import OrderedDict
 
@@ -44,6 +45,27 @@ logger = logging.getLogger(__name__)
 
 
 INITIAL_PID = os.getpid()
+
+
+class AutoJSONEncoder(json.JSONEncoder):
+    """
+    JSON encoder trying to_json() first
+    """
+    def default(self, obj):
+        try:
+            return obj.to_json()
+        except AttributeError:
+            return self.default_classic(obj)
+
+    def default_classic(self, o):
+        if isinstance(o, set):
+            return list(o)
+        elif isinstance(o, datetime.datetime):
+            return (o - datetime.datetime(1970, 1, 1)).total_seconds()
+        elif isinstance(o, bytes):
+            return o.decode('UTF-8')
+        else:
+            return super(AutoJSONEncoder, self).default(o)
 
 
 @zope.interface.implementer(interfaces.IAuthenticator)
@@ -390,7 +412,7 @@ s.serve_forever()" """
                 n_data[k] = val
                 n_data['cbot_' + k] = val
 
-        n_data['cbot_json'] = json.dumps(json_data)
+        n_data['cbot_json'] = self._json_dumps(json_data)
         return n_data
 
     def _perform_http01_challenge(self, achall):
@@ -541,6 +563,8 @@ s.serve_forever()" """
                 json_data[FIELD_KEY_PEM] = fh.read()
         except:
             pass
+
+        json_data = self._json_sanitize_dict(json_data)
 
         if self._is_text_mode():
             self._notify_and_wait(
@@ -750,17 +774,17 @@ s.serve_forever()" """
         for key, val in list(dictionary.items()):
             # Not highly efficient, would be neater to clean up FIELD_TOKEN.
             # But if any of the others turn to bytes in the future, this will solve it:
-            if type(key) == bytes:
+            if isinstance(key, bytes):
                 del dictionary[key]
                 key = key.decode('UTF-8')
                 dictionary[key] = val
 
-            if type(val) == bytes:
+            if isinstance(val, bytes):
                 dictionary[key] = val.decode('UTF-8')
             elif type(val) in (list, tuple):
                 nval = []
                 for item in val:
-                    if type(item) == bytes:
+                    if isinstance(item, bytes):
                         item = item.decode('UTF-8')
                     nval.append(item)
                 dictionary[key] = nval
@@ -848,6 +872,17 @@ s.serve_forever()" """
         """
         return self.conf("dehydrated-dns")
 
+    def _json_dumps(self, data, **kwargs):
+        """
+        Dumps data to the json string
+        Using custom serializer by default
+        :param data:
+        :param kwargs:
+        :return:
+        """
+        kwargs.setdefault('cls', AutoJSONEncoder)
+        return json.dumps(data, **kwargs)
+
     def _json_out(self, data, new_line=False):
         """
         Dumps data as JSON to the stdout
@@ -856,7 +891,7 @@ s.serve_forever()" """
         :return:
         """
         # pylint: disable=no-self-use
-        json_str = json.dumps(data)
+        json_str = self._json_dumps(data)
         if new_line:
             json_str += '\n'
         sys.stdout.write(json_str)
