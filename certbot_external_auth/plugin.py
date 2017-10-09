@@ -1,6 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """Manual plugin on stereoids."""
-import os
+
+from past.builtins import basestring
+from builtins import bytes
+import six
+
+import atexit
+import calendar
+import collections
+import json
 import logging
+import math
+import os
 import pipes
 import shutil
 import signal
@@ -9,30 +22,22 @@ import subprocess
 import sys
 import tempfile
 import time
-import json
-import math
 import types
-import calendar
-import collections
-from collections import OrderedDict
-from builtins import bytes
-import atexit
-from six.moves import queue  # pylint: disable=import-error
 
-import six
+from collections import OrderedDict
+
 import zope.component
 import zope.interface
-
 from acme import challenges
 from acme import errors as acme_errors
 from acme.jose import b64
-
 from certbot import errors
 from certbot import interfaces
-from certbot import util
 from certbot import reverter
+from certbot.display import util as display_util
 from certbot.plugins import common
-from certbot.display import util as display_util, ops as display_ops
+
+from six.moves import queue  # pylint: disable=import-error
 
 from certbot_external_auth import *
 
