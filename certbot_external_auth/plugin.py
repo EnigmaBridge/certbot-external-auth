@@ -22,7 +22,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import types
 
 from collections import OrderedDict
 
@@ -344,7 +343,7 @@ s.serve_forever()" """
         cur_record[FIELD_STATUS] = None
         cur_record[FIELD_DOMAIN] = achall.domain
         cur_record[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
-        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, types.StringTypes) else ''
+        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, basestring) else ''
         cur_record[FIELD_KEY_AUTH] = response.key_authorization
         cur_record[FIELD_VALIDATED] = None
         cur_record[FIELD_ERROR] = None
@@ -383,7 +382,7 @@ s.serve_forever()" """
             val = json_data[k]
             if k == 'command':
                 continue
-            if isinstance(val, types.FloatType):
+            if isinstance(val, float):
                 val = str(math.ceil(val))
             if not isinstance(val, (str, basestring)):
                 val = str(val)
