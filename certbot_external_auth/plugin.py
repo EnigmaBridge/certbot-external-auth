@@ -743,8 +743,13 @@ s.serve_forever()" """
     #
 
     def _json_sanitize_dict(self, dictionary):
+        """
+        Sanitizes dictionary prior JSON serialization, handles byte string serialization
+        :param dictionary:
+        :return:
+        """
         for key, val in list(dictionary.items()):
-            # Not highly effecient, would be neater to clean up FIELD_TOKEN.
+            # Not highly efficient, would be neater to clean up FIELD_TOKEN.
             # But if any of the others turn to bytes in the future, this will solve it:
             if type(key) == bytes:
                 del dictionary[key]
@@ -763,6 +768,11 @@ s.serve_forever()" """
         return dictionary
 
     def _is_file_executable(self, fpath):
+        """
+        Returns true if the given file is executable (+x flag)
+        :param fpath:
+        :return:
+        """
         if os.name.lower() == 'posix':
             try:
                 return os.access(fpath, os.X_OK)
@@ -772,21 +782,43 @@ s.serve_forever()" """
             return True
 
     def _try_get_abs_path(self, fpath):
+        """
+        Returns absolute path, catching possible exceptions.
+        :param fpath:
+        :return:
+        """
         try:
             return os.path.abspath(fpath)
         except:
             return fpath
 
     def _get_file_mtime(self, file):
+        """
+        Returns file modification time
+        :param file:
+        :return:
+        """
         return os.path.getmtime(file)
 
     def _is_text_mode(self):
+        """
+        Returns true if text-mode is selected
+        :return:
+        """
         return self.conf("text-mode")
 
     def _is_json_mode(self):
+        """
+        Returns true if json mode is selected
+        :return:
+        """
         return not self._is_text_mode() and not self._is_handler_mode()
 
     def _is_handler_mode(self):
+        """
+        Returns true if handler mode is selected
+        :return:
+        """
         return self.conf("handler") is not None
 
     def _is_handler_broken(self):
@@ -818,6 +850,12 @@ s.serve_forever()" """
         return self.conf("dehydrated-dns")
 
     def _json_out(self, data, new_line=False):
+        """
+        Dumps data as JSON to the stdout
+        :param data:
+        :param new_line:
+        :return:
+        """
         # pylint: disable=no-self-use
         json_str = json.dumps(data)
         if new_line:
@@ -826,11 +864,21 @@ s.serve_forever()" """
         sys.stdout.flush()
 
     def _json_out_and_wait(self, data):
+        """
+        Dumps data as JSON to stdout and waits for prompt
+        :param data:
+        :return:
+        """
         # pylint: disable=no-self-use
         self._json_out(data, True)
         six.moves.input("")
 
     def _notify_and_wait(self, message):
+        """
+        Writes message to the stdout and waits for user confirmation
+        :param message:
+        :return:
+        """
         # pylint: disable=no-self-use
         sys.stdout.write(message)
         sys.stdout.write("Press ENTER to continue")
@@ -838,7 +886,10 @@ s.serve_forever()" """
         six.moves.input("")
 
     def _get_ip_logging_permission(self):
-        # pylint: disable=missing-docstring
+        """
+        Configures public ip logging config keys from the env.
+        :return:
+        """
         if self.config.noninteractive_mode and self.conf("public-ip-logging-ok"):
             self.config.namespace.certbot_external_auth_out_public_ip_logging_ok = True
             self.config.namespace.manual_public_ip_logging_ok = True
@@ -858,6 +909,11 @@ s.serve_forever()" """
                 self.config.namespace.manual_public_ip_logging_ok = True
 
     def _get_message(self, achall):
-        # pylint: disable=missing-docstring,no-self-use,unused-argument
+        """
+        Retrieves text message to display for the challange from templates
+        :param achall:
+        :return:
+        """
+        # pylint: disable=no-self-use,unused-argument
         return self.MESSAGE_TEMPLATE.get(achall.chall.typ, "")
 
