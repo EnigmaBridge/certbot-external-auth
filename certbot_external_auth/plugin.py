@@ -25,7 +25,10 @@ import zope.interface
 
 from acme import challenges
 from acme import errors as acme_errors
-from acme.jose import b64
+try:
+    from acme.jose import b64
+except:
+    from josepy import b64
 
 from certbot import errors
 from certbot import interfaces
@@ -315,6 +318,7 @@ s.serve_forever()" """
     def _get_cleanup_json(self, achall):
         response, validation = achall.response_and_validation()
 
+
         cur_record = OrderedDict()
         cur_record[FIELD_CMD] = COMMAND_CLEANUP
         cur_record[FIELD_TYPE] = achall.chall.typ
@@ -329,8 +333,10 @@ s.serve_forever()" """
         cur_record[FIELD_STATUS] = None
         cur_record[FIELD_DOMAIN] = achall.domain
         cur_record[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
-        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, types.StringTypes) else ''
-        cur_record[FIELD_KEY_AUTH] = response.key_authorization
+        if type(cur_record[FIELD_TOKEN]) == bytes:
+            cur_record[FIELD_TOKEN] = cur_record[FIELD_TOKEN].decode('UTF-8')
+        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, str) else ''
+        cur_record[FIELD_KEY_AUTH] = response.key_authorization.decode('UTF-8') if isinstance(response.key_authorization, bytes) else response.key_authorization
         cur_record[FIELD_VALIDATED] = None
         cur_record[FIELD_ERROR] = None
 
