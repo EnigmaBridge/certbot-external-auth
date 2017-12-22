@@ -356,7 +356,6 @@ s.serve_forever()" """
     def _get_cleanup_json(self, achall):
         response, validation = achall.response_and_validation()
 
-
         cur_record = OrderedDict()
         cur_record[FIELD_CMD] = COMMAND_CLEANUP
         cur_record[FIELD_TYPE] = achall.chall.typ
@@ -433,7 +432,6 @@ s.serve_forever()" """
 
         command = self.CMD_TEMPLATE.format(
             root=self._root, achall=achall, response=response,
-            # TODO(kuba): pipes still necessary?
             validation=pipes.quote(validation),
             encoded_token=achall.chall.encode("token"),
             port=port)
