@@ -5,7 +5,8 @@ version = '0.0.9'
 
 install_requires = [
     'acme',
-    'certbot>=0.15'
+    'josepy',
+    'certbot>=0.15',
 ]
 
 setup(
