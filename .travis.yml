@@ -1,13 +1,46 @@
 language: python
+
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+before_install:
+  - '([ $TRAVIS_OS_NAME == linux ] && dpkg -s libaugeas0) || (brew update && brew install augeas python3)'
+
+before_script:
+  - 'if [ $TRAVIS_OS_NAME = osx ] ; then ulimit -n 1024 ; fi'
+
+# container-based infrastructure
+sudo: false
+
 python:
  - "2.6"
  - "2.7"
  - "3.4"
  - "3.5"
  - "3.6"
+
 install:
  - "pip install certbot"
  - "python setup.py install"
-script: 
- - echo "TODO" 
 
+script: 
+ - 'python certbot_external_auth/tests/plugin_tests.py'
+
+addons:
+  apt:
+    sources:
+    - augeas
+    packages:  # Keep in sync with letsencrypt-auto-source/pieces/bootstrappers/deb_common.sh and Boulder.
+    - python-dev
+    - python-virtualenv
+    - gcc
+    - libaugeas0
+    - libssl-dev
+    - libffi-dev
+    - ca-certificates
+    - nginx-light
+    - openssl
+    - apache2
+    - libapache2-mod-wsgi
+    - libapache2-mod-macro
