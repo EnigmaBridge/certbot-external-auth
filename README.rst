@@ -1,6 +1,11 @@
 External authenticator for Certbot
 ----------------------------------
 
+|Build Status|
+
+.. |Build Status| image:: https://travis-ci.org/EnigmaBridge/certbot-external-auth.svg?branch=master
+   :target: https://travis-ci.org/EnigmaBridge/certbot-external-auth
+
 Automation - the main goal of letsencrypt is to make certificate
 management hassle-free. It works like that in most situations but each
 user has to deal with its own network configuration (NAT, firewalls,
