@@ -1,7 +1,7 @@
 from setuptools import setup
 from setuptools import find_packages
 
-version = '0.0.9'
+version = '0.1.0'
 
 install_requires = [
     'acme',
@@ -20,7 +20,6 @@ setup(
     long_description=open('README.rst').read(),
     python_requires='>=2.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     classifiers=[
-        'Development Status :: 3 - Alpha',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Developers',
         'Environment :: Plugins',
