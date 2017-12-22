@@ -1,6 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """Manual plugin on stereoids."""
-import os
+
+from past.builtins import basestring
+from builtins import bytes
+import six
+
+import atexit
+import calendar
+import collections
+import json
 import logging
+import math
+import os
 import pipes
 import shutil
 import signal
@@ -9,22 +22,15 @@ import subprocess
 import sys
 import tempfile
 import time
-import json
-import math
-import types
-import calendar
-import collections
-from collections import OrderedDict
-from builtins import bytes
-import atexit
-from six.moves import queue  # pylint: disable=import-error
+import datetime
 
-import six
+from collections import OrderedDict
+
 import zope.component
 import zope.interface
-
 from acme import challenges
 from acme import errors as acme_errors
+
 try:
     from acme.jose import b64
 except:
@@ -32,10 +38,11 @@ except:
 
 from certbot import errors
 from certbot import interfaces
-from certbot import util
 from certbot import reverter
+from certbot.display import util as display_util
 from certbot.plugins import common
-from certbot.display import util as display_util, ops as display_ops
+
+from six.moves import queue  # pylint: disable=import-error
 
 from certbot_external_auth import *
 
@@ -43,6 +50,27 @@ logger = logging.getLogger(__name__)
 
 
 INITIAL_PID = os.getpid()
+
+
+class AutoJSONEncoder(json.JSONEncoder):
+    """
+    JSON encoder trying to_json() first
+    """
+    def default(self, obj):
+        try:
+            return obj.to_json()
+        except AttributeError:
+            return self.default_classic(obj)
+
+    def default_classic(self, o):
+        if isinstance(o, set):
+            return list(o)
+        elif isinstance(o, datetime.datetime):
+            return (o - datetime.datetime(1970, 1, 1)).total_seconds()
+        elif isinstance(o, bytes):
+            return o.decode('UTF-8')
+        else:
+            return super(AutoJSONEncoder, self).default(o)
 
 
 @zope.interface.implementer(interfaces.IAuthenticator)
@@ -191,6 +219,11 @@ s.serve_forever()" """
         return [challenges.DNS01, challenges.HTTP01, challenges.TLSSNI01]
 
     def perform(self, achalls):
+        """
+        Performs the actual challenge resolving.
+        :param achalls:
+        :return:
+        """
         # pylint: disable=missing-docstring
         self._get_ip_logging_permission()
         mapping = {"http-01": self._perform_http01_challenge,
@@ -289,6 +322,11 @@ s.serve_forever()" """
                 sock.close()
 
     def cleanup(self, achalls):
+        """
+        Cleaning up challenges, called by AuthHandler
+        :param achalls:
+        :return:
+        """
         # pylint: disable=missing-docstring
 
         if self._is_classic_handler_mode() \
@@ -335,7 +373,7 @@ s.serve_forever()" """
         cur_record[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
         if type(cur_record[FIELD_TOKEN]) == bytes:
             cur_record[FIELD_TOKEN] = cur_record[FIELD_TOKEN].decode('UTF-8')
-        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, str) else ''
+        cur_record[FIELD_VALIDATION] = validation if isinstance(validation, basestring) else ''
         cur_record[FIELD_KEY_AUTH] = response.key_authorization.decode('UTF-8') if isinstance(response.key_authorization, bytes) else response.key_authorization
         cur_record[FIELD_VALIDATED] = None
         cur_record[FIELD_ERROR] = None
@@ -374,7 +412,7 @@ s.serve_forever()" """
             val = json_data[k]
             if k == 'command':
                 continue
-            if isinstance(val, types.FloatType):
+            if isinstance(val, float):
                 val = str(math.ceil(val))
             if not isinstance(val, (str, basestring)):
                 val = str(val)
@@ -382,7 +420,7 @@ s.serve_forever()" """
                 n_data[k] = val
                 n_data['cbot_' + k] = val
 
-        n_data['cbot_json'] = json.dumps(json_data)
+        n_data['cbot_json'] = self._json_dumps(json_data)
         return n_data
 
     def _perform_http01_challenge(self, achall):
@@ -534,14 +572,16 @@ s.serve_forever()" """
         except:
             pass
 
+        json_data = self._json_sanitize_dict(json_data)
+
         if self._is_text_mode():
             self._notify_and_wait(
                 self._get_message(achall).format(
-                    domain = json_data[FIELD_DOMAIN],
-                    z_domain = json_data[FIELD_Z_DOMAIN],
-                    cert_path = json_data[FIELD_CERT_PATH],
-                    key_path = json_data[FIELD_KEY_PATH],
-                    port = json_data[FIELD_PORT]))
+                    domain=json_data[FIELD_DOMAIN],
+                    z_domain=json_data[FIELD_Z_DOMAIN],
+                    cert_path=json_data[FIELD_CERT_PATH],
+                    key_path=json_data[FIELD_KEY_PATH],
+                    port=json_data[FIELD_PORT]))
 
         elif self._is_json_mode():
             self._json_out_and_wait(json_data)
@@ -734,26 +774,36 @@ s.serve_forever()" """
     #
 
     def _json_sanitize_dict(self, dictionary):
+        """
+        Sanitizes dictionary prior JSON serialization, handles byte string serialization
+        :param dictionary:
+        :return:
+        """
         for key, val in list(dictionary.items()):
-            # Not highly effecient, would be neater to clean up FIELD_TOKEN.
+            # Not highly efficient, would be neater to clean up FIELD_TOKEN.
             # But if any of the others turn to bytes in the future, this will solve it:
-            if type(key) == bytes:
+            if isinstance(key, bytes):
                 del dictionary[key]
                 key = key.decode('UTF-8')
                 dictionary[key] = val
 
-            if type(val) == bytes:
+            if isinstance(val, bytes):
                 dictionary[key] = val.decode('UTF-8')
             elif type(val) in (list, tuple):
                 nval = []
                 for item in val:
-                    if type(item) == bytes:
+                    if isinstance(item, bytes):
                         item = item.decode('UTF-8')
                     nval.append(item)
                 dictionary[key] = nval
         return dictionary
 
     def _is_file_executable(self, fpath):
+        """
+        Returns true if the given file is executable (+x flag)
+        :param fpath:
+        :return:
+        """
         if os.name.lower() == 'posix':
             try:
                 return os.access(fpath, os.X_OK)
@@ -763,21 +813,43 @@ s.serve_forever()" """
             return True
 
     def _try_get_abs_path(self, fpath):
+        """
+        Returns absolute path, catching possible exceptions.
+        :param fpath:
+        :return:
+        """
         try:
             return os.path.abspath(fpath)
         except:
             return fpath
 
     def _get_file_mtime(self, file):
+        """
+        Returns file modification time
+        :param file:
+        :return:
+        """
         return os.path.getmtime(file)
 
     def _is_text_mode(self):
+        """
+        Returns true if text-mode is selected
+        :return:
+        """
         return self.conf("text-mode")
 
     def _is_json_mode(self):
+        """
+        Returns true if json mode is selected
+        :return:
+        """
         return not self._is_text_mode() and not self._is_handler_mode()
 
     def _is_handler_mode(self):
+        """
+        Returns true if handler mode is selected
+        :return:
+        """
         return self.conf("handler") is not None
 
     def _is_handler_broken(self):
@@ -788,29 +860,67 @@ s.serve_forever()" """
         return self._handler_file_problem
 
     def _is_classic_handler_mode(self):
-        """Handler mode && not dehydrated"""
+        """
+        Handler mode && not dehydrated
+        :return:
+        """
         return self._is_handler_mode() and not self._is_dehydrated_dns()
 
     def _get_handler(self):
+        """
+        Returns handler script path - from CLI argument
+        :return:
+        """
         return self.conf("handler")
 
     def _is_dehydrated_dns(self):
+        """
+        Returns true if dehydrated dns mode is used
+        :return:
+        """
         return self.conf("dehydrated-dns")
 
+    def _json_dumps(self, data, **kwargs):
+        """
+        Dumps data to the json string
+        Using custom serializer by default
+        :param data:
+        :param kwargs:
+        :return:
+        """
+        kwargs.setdefault('cls', AutoJSONEncoder)
+        return json.dumps(data, **kwargs)
+
     def _json_out(self, data, new_line=False):
+        """
+        Dumps data as JSON to the stdout
+        :param data:
+        :param new_line:
+        :return:
+        """
         # pylint: disable=no-self-use
-        json_str = json.dumps(data)
+        json_str = self._json_dumps(data)
         if new_line:
             json_str += '\n'
         sys.stdout.write(json_str)
         sys.stdout.flush()
 
     def _json_out_and_wait(self, data):
+        """
+        Dumps data as JSON to stdout and waits for prompt
+        :param data:
+        :return:
+        """
         # pylint: disable=no-self-use
         self._json_out(data, True)
         six.moves.input("")
 
     def _notify_and_wait(self, message):
+        """
+        Writes message to the stdout and waits for user confirmation
+        :param message:
+        :return:
+        """
         # pylint: disable=no-self-use
         sys.stdout.write(message)
         sys.stdout.write("Press ENTER to continue")
@@ -818,7 +928,10 @@ s.serve_forever()" """
         six.moves.input("")
 
     def _get_ip_logging_permission(self):
-        # pylint: disable=missing-docstring
+        """
+        Configures public ip logging config keys from the env.
+        :return:
+        """
         if self.config.noninteractive_mode and self.conf("public-ip-logging-ok"):
             self.config.namespace.certbot_external_auth_out_public_ip_logging_ok = True
             self.config.namespace.manual_public_ip_logging_ok = True
@@ -838,6 +951,11 @@ s.serve_forever()" """
                 self.config.namespace.manual_public_ip_logging_ok = True
 
     def _get_message(self, achall):
-        # pylint: disable=missing-docstring,no-self-use,unused-argument
+        """
+        Retrieves text message to display for the challange from templates
+        :param achall:
+        :return:
+        """
+        # pylint: disable=no-self-use,unused-argument
         return self.MESSAGE_TEMPLATE.get(achall.chall.typ, "")
 
