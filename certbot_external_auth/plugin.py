@@ -111,14 +111,6 @@ If you don't have HTTP server configured, you can run the following
 command on the target server (as root):
 
 {command}
-""",
-        "tls-sni-01": """\
-Verification for {domain}:
-Make sure your web server serves TLS SNI host on domain:
-{z_domain} with the following
-- certificate: {cert_path}
-- key: {key_path}
-
 """
     }
 
@@ -216,7 +208,7 @@ s.serve_forever()" """
 
     def get_chall_pref(self, domain):
         # pylint: disable=missing-docstring,no-self-use,unused-argument
-        return [challenges.DNS01, challenges.HTTP01, challenges.TLSSNI01]
+        return [challenges.DNS01, challenges.HTTP01]
 
     def perform(self, achalls):
         """
@@ -227,8 +219,7 @@ s.serve_forever()" """
         # pylint: disable=missing-docstring
         self._get_ip_logging_permission()
         mapping = {"http-01": self._perform_http01_challenge,
-                   "dns-01": self._perform_dns01_challenge,
-                   "tls-sni-01": self._perform_tlssni01_challenge,
+                   "dns-01": self._perform_dns01_challenge
                    }
         responses = []
         # TODO: group achalls by the same socket.gethostbyname(_ex)
@@ -363,8 +354,6 @@ s.serve_forever()" """
         if isinstance(achall.chall, challenges.HTTP01):
             pass
         elif isinstance(achall.chall, challenges.DNS01):
-            pass
-        elif isinstance(achall.chall, challenges.TLSSNI01):
             pass
 
         cur_record[FIELD_STATUS] = None
@@ -543,70 +532,6 @@ s.serve_forever()" """
                 logger.warning("Self-verify of challenge failed.")
 
         return response
-
-    def _perform_tlssni01_challenge(self, achall):
-        tls_help = self._get_tls_sni_help(achall)
-        response = tls_help._setup_challenge_cert(achall)
-
-        json_data = OrderedDict()
-        json_data[FIELD_CMD] = COMMAND_PERFORM
-        json_data[FIELD_TYPE] = achall.chall.typ
-        json_data[FIELD_DOMAIN] = achall.domain
-        json_data[FIELD_TOKEN] = b64.b64encode(achall.chall.token)
-        json_data[FIELD_Z_DOMAIN] = achall.response(achall.account_key).z_domain
-        json_data[FIELD_VALIDATION] = json_data[FIELD_Z_DOMAIN]
-        json_data[FIELD_CERT_PATH] = tls_help.get_cert_path(achall)
-        json_data[FIELD_KEY_PATH] = tls_help.get_key_path(achall)
-        json_data[FIELD_PORT] = str(self.config.tls_sni_01_port)
-        json_data[FIELD_KEY_AUTH] = response.key_authorization
-        json_data[FIELD_CERT_PEM] = None
-        json_data[FIELD_KEY_PEM] = None
-
-        try:
-            with open(json_data[FIELD_CERT_PATH], 'r') as fh:
-                json_data[FIELD_CERT_PEM] = fh.read()
-        except:
-            pass
-        try:
-            with open(json_data[FIELD_KEY_PATH], 'r') as fh:
-                json_data[FIELD_KEY_PEM] = fh.read()
-        except:
-            pass
-
-        json_data = self._json_sanitize_dict(json_data)
-
-        if self._is_text_mode():
-            self._notify_and_wait(
-                self._get_message(achall).format(
-                    domain=json_data[FIELD_DOMAIN],
-                    z_domain=json_data[FIELD_Z_DOMAIN],
-                    cert_path=json_data[FIELD_CERT_PATH],
-                    key_path=json_data[FIELD_KEY_PATH],
-                    port=json_data[FIELD_PORT]))
-
-        elif self._is_json_mode():
-            self._json_out_and_wait(json_data)
-
-        elif self._is_handler_mode():
-            self._json_out(json_data, True)
-            if self._call_handler("perform", **(self._get_json_to_kwargs(json_data))) is None:
-                raise errors.PluginError("Error in calling the handler to do the perform (challenge) stage")
-
-        else:
-            raise errors.PluginError("Unknown plugin mode selected")
-
-        if not response.simple_verify(
-                achall.chall, achall.domain,
-                achall.account_key.public_key(),
-                None):
-            logger.warning("Self-verify of challenge failed.")
-
-        return response
-
-    def _get_tls_sni_help(self, achall):
-        tls_help = common.TLSSNI01(self)
-        tls_help.add_chall(achall, 0)
-        return tls_help
 
     def _cleanup_http01_challenge(self, achall):
         # pylint: disable=missing-docstring,unused-argument
