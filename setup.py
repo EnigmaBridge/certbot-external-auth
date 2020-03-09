@@ -1,7 +1,7 @@
 from setuptools import setup
 from setuptools import find_packages
 
-version = '0.1.1'
+version = '0.1.2'
 
 install_requires = [
     'acme',
@@ -10,14 +10,15 @@ install_requires = [
 ]
 
 setup(
-    name='certbot-external-auth',
+    name='certbot-ext-auth',
     version=version,
     description="External authenticator for Certbot",
     url='https://github.com/EnigmaBridge/certbot-external-auth',
-    author="Dusan Klinec",
-    author_email='dusan@enigmabridge.com',
-    license=open('LICENSE.txt').read(),
-    long_description=open('README.rst').read(),
+    author="Enigma Bridge",
+    author_email='support@keychest.net',
+    package_data={'certbot-ext-auto': ['LICENSE']},
+    long_description=open('README.md', encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
     python_requires='>=2.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     classifiers=[
         'Intended Audience :: System Administrators',
