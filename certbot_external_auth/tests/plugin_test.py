@@ -45,12 +45,6 @@ class ChallengeFactoryTest(unittest.TestCase):
         self.assertEqual(
             [achall.chall for achall in achalls], acme_util.CHALLENGES)
 
-    def test_one_tls_sni(self):
-        achalls = self.handler._challenge_factory(self.dom, [1])
-
-        self.assertEqual(
-            [achall.chall for achall in achalls], [acme_util.TLSSNI01])
-
     def test_unrecognized(self):
         self.handler.authzr["failure.com"] = acme_util.gen_authzr(
             messages.STATUS_PENDING, "failure.com",
@@ -79,11 +73,9 @@ class GetAuthorizationsTest(unittest.TestCase):
             mock.MagicMock(**constants.CLI_DEFAULTS)
         )
 
-        self.patch_tls = mock.patch('acme.challenges.TLSSNI01Response.simple_verify')
         self.patch_http = mock.patch('acme.challenges.HTTP01Response.simple_verify')
         self.patch_dns = mock.patch('acme.challenges.DNS01Response.simple_verify')
 
-        self.patch_tls.start()
         self.patch_http.start()
         self.patch_dns.start()
 
@@ -138,7 +130,6 @@ class GetAuthorizationsTest(unittest.TestCase):
         shutil.rmtree(self.tempdir)
         logging.disable(logging.NOTSET)
         self.input_patch.stop()
-        self.patch_tls.stop()
         self.patch_http.stop()
         self.patch_dns.stop()
 
@@ -157,104 +148,6 @@ class GetAuthorizationsTest(unittest.TestCase):
                     self.assertRaises(SystemExit, self._unmocked_parse, args, output)
 
         return output.getvalue()
-
-    @mock.patch("certbot.auth_handler.AuthHandler._poll_challenges")
-    def test_name1_tls_sni_01_1(self, mock_poll):
-        self.mock_net.request_domain_challenges.side_effect = functools.partial(
-            gen_dom_authzr, challs=acme_util.CHALLENGES)
-
-        mock_poll.side_effect = self._validate_all
-
-        authzr = self.handler.get_authorizations(["0"])
-
-        self.assertEqual(self.mock_net.answer_challenge.call_count, 1)
-
-        self.assertEqual(mock_poll.call_count, 1)
-        chall_update = mock_poll.call_args[0][0]
-        self.assertEqual(list(six.iterkeys(chall_update)), ["0"])
-        self.assertEqual(len(chall_update.values()), 1)
-
-        self.assertEqual(self.mock_auth.cleanup.call_count, 1)
-        # Test if list first element is TLSSNI01, use typ because it is an achall
-        self.assertEqual(
-            self.mock_auth.cleanup.call_args[0][0][0].typ, "tls-sni-01")
-
-        self.assertEqual(len(authzr), 1)
-        self.assertEqual(self.mock_json_out.call_count, 1)
-        self.assertEqual(len(self.mock_data), 1)
-        self.assertIn('cmd', self.mock_data[0])
-        self.assertIn('token', self.mock_data[0])
-        self.assertIn('validation', self.mock_data[0])
-        self.assertTrue(len(self.mock_data[0]['validation']) > 5)
-
-    @mock.patch("certbot.auth_handler.AuthHandler._poll_challenges")
-    def test_name1_tls_sni_01_1_http_01_1_dns_1(self, mock_poll):
-        self.mock_net.request_domain_challenges.side_effect = functools.partial(
-            gen_dom_authzr, challs=acme_util.CHALLENGES, combos=False)
-
-        mock_poll.side_effect = self._validate_all
-        self.mock_auth.get_chall_pref.return_value.append(challenges.HTTP01)
-        self.mock_auth.get_chall_pref.return_value.append(challenges.DNS01)
-
-        authzr = self.handler.get_authorizations(["0"])
-
-        self.assertEqual(self.mock_net.answer_challenge.call_count, 3)
-
-        self.assertEqual(mock_poll.call_count, 1)
-        chall_update = mock_poll.call_args[0][0]
-        self.assertEqual(list(six.iterkeys(chall_update)), ["0"])
-        self.assertEqual(len(chall_update.values()), 1)
-
-        self.assertEqual(self.mock_auth.cleanup.call_count, 1)
-        # Test if list first element is TLSSNI01, use typ because it is an achall
-        for achall in self.mock_auth.cleanup.call_args[0][0]:
-            self.assertTrue(achall.typ in ["tls-sni-01", "http-01", "dns-01"])
-
-        # Length of authorizations list
-        self.assertEqual(len(authzr), 1)
-        self.assertEqual(self.mock_json_out.call_count, 3)
-        self.assertEqual(len(self.mock_data), 3)
-        for msg in self.mock_data:
-            self.assertIn('cmd', msg)
-            self.assertIn('token', msg)
-            self.assertIn('validation', msg)
-            self.assertTrue(len(msg['validation']) > 5)
-
-    @mock.patch("certbot.auth_handler.AuthHandler._poll_challenges")
-    def test_name3_tls_sni_01_3(self, mock_poll):
-        self.mock_net.request_domain_challenges.side_effect = functools.partial(
-            gen_dom_authzr, challs=acme_util.CHALLENGES)
-
-        mock_poll.side_effect = self._validate_all
-
-        with mock.patch('certbot.util.safe_open') as mock_open:
-            mock_open.return_value = mock.MagicMock()
-            authzr = self.handler.get_authorizations(["0", "1", "2"])
-
-        self.assertEqual(self.mock_net.answer_challenge.call_count, 3)
-
-        # Check poll call
-        self.assertEqual(mock_poll.call_count, 1)
-        chall_update = mock_poll.call_args[0][0]
-        self.assertEqual(len(list(six.iterkeys(chall_update))), 3)
-        self.assertTrue("0" in list(six.iterkeys(chall_update)))
-        self.assertEqual(len(chall_update["0"]), 1)
-        self.assertTrue("1" in list(six.iterkeys(chall_update)))
-        self.assertEqual(len(chall_update["1"]), 1)
-        self.assertTrue("2" in list(six.iterkeys(chall_update)))
-        self.assertEqual(len(chall_update["2"]), 1)
-
-        self.assertEqual(self.mock_auth.cleanup.call_count, 1)
-
-        self.assertEqual(len(authzr), 3)
-
-        self.assertEqual(self.mock_json_out.call_count, 3)
-        self.assertEqual(len(self.mock_data), 3)
-        for msg in self.mock_data:
-            self.assertIn('cmd', msg)
-            self.assertIn('token', msg)
-            self.assertIn('validation', msg)
-            self.assertTrue(len(msg['validation']) > 5)
 
     @mock.patch("certbot.auth_handler.AuthHandler._poll_challenges")
     def test_debug_challenges(self, mock_poll):
