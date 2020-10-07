@@ -48,8 +48,8 @@ Here is an example of a typical use:
 
     certbot --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d example.com certonly
 
 There are 3 main modes of operation:
@@ -61,8 +61,8 @@ There are 3 main modes of operation:
    augmented mode.
 
 If you want it to use as Authenticator and Installer, use
-``--configurator certbot-external-auth:out`` certbot flag, for
-Authenticator only use ``-a certbot-external-auth:out``
+``--configurator out`` certbot flag, for
+Authenticator only use ``-a out``
 
 In authenticator mode one can use certbot actions ``certonly`` or
 ``renew``. If installer mode is enabled too use ``run`` action - typical
@@ -88,18 +88,18 @@ Reporter was substituted to produce JSON logs so STDOUT is JSON only.
 ## Arguments
 
 
-    --certbot-external-auth:out-public-ip-logging-ok
+    --out-public-ip-logging-ok
             Skips public IP query check, required for JSON mode
 
-    --certbot-external-auth:out-text-mode
+    --out-text-mode
             Defaults to manual.py text stdout, no JSON
 
-    --certbot-external-auth:out-handler
+    --out-handler
             If set, enables handler mode. Commands are 
             sent to the handler script for processing. 
             Arguments are sent in ENV.
             
-    --certbot-external-auth:out-dehydrated-dns
+    --out-dehydrated-dns
             If handler mode is enabled, compatibility 
             with dehydrated-dns hooks is enabled
 
@@ -124,8 +124,8 @@ Run the certbot with the following command:
     certbot --staging \
             --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d "bristol3.pki.enigmabridge.com" \
             -d "bs3.pki.enigmabridge.com" \
             --preferred-challenges dns \
@@ -157,8 +157,8 @@ so it is demonstrated only once.
     certbot --staging \
             --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d "bristol3.pki.enigmabridge.com" \
             -d "bs3.pki.enigmabridge.com" \
             --preferred-challenges dns \
@@ -188,8 +188,8 @@ Run the certbot with the following command (just
     certbot --staging \
             --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d "bristol3.pki.enigmabridge.com" \
             -d "bs3.pki.enigmabridge.com" \
             --preferred-challenges http \
@@ -222,13 +222,13 @@ please make sure the file is executable (has ``x`` flag,
     certbot --staging \
             --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d "bristol3.pki.enigmabridge.com" \
             -d "bs3.pki.enigmabridge.com" \
             --preferred-challenges dns \
-            --certbot-external-auth:out-handler ./dehydrated-example.sh \
-            --certbot-external-auth:out-dehydrated-dns \
+            --out-handler ./dehydrated-example.sh \
+            --out-dehydrated-dns \
             run 2>/dev/null
 
 Stdout:
@@ -332,12 +332,12 @@ sure the file is executable (has ``x`` flag, ``chmod +x handler-file``).
     certbot --staging \
             --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d "bristol3.pki.enigmabridge.com" \
             -d "bs3.pki.enigmabridge.com" \
             --preferred-challenges dns \
-            --certbot-external-auth:out-handler ./handler-example.sh \
+            --out-handler ./handler-example.sh \
             certonly 2>/dev/null
 
 Stdout:
@@ -447,12 +447,12 @@ Run the certbot with the following command (just
     certbot --staging \
             --text --agree-tos --email you@example.com \
             --expand --renew-by-default \
-            --configurator certbot-external-auth:out \
-            --certbot-external-auth:out-public-ip-logging-ok \
+            --configurator out \
+            --out-public-ip-logging-ok \
             -d "bristol3.pki.enigmabridge.com" \
             -d "bs3.pki.enigmabridge.com" \
             --preferred-challenges http \
-            --certbot-external-auth:out-handler ./handler-example.sh \
+            --out-handler ./handler-example.sh \
             certonly 2>/dev/null
 
 Stdout:

@@ -17,7 +17,7 @@ setup(
     author="Enigma Bridge",
     author_email='support@keychest.net',
     package_data={'certbot-ext-auto': ['LICENSE']},
-    long_description=open('README.md', encoding="utf-8").read(),
+    long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
     python_requires='>=2.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     classifiers=[
